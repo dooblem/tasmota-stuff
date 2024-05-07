@@ -23,6 +23,7 @@ m:r1=0 3
 m:r0=0 3
 
 pic=0
+n=0
 
 ; timer used to pause execution a few secs to disable flapping
 ; if timer is not null. pause
@@ -32,7 +33,7 @@ t:tmr=0
 >S
 
 ; skip if not sun hours (4h-20h). or timer set
-if (upsecs%10==0 and tmr==0 and hours>=4 and hours<20)
+if (upsecs%20==0 and tmr==0 and hours>=4 and hours<20)
 {
 
 ;print %hours% %preh%
@@ -54,11 +55,15 @@ http=0
 ;;;;;;;;;;;;;;;;;;;;;;;;;;
 >E
 ; be sure the event is our http req
-if http=0 {
+if http==1 {
+ http=0
+} else {
  break
 }
 
 =#initRes
+; save nb res ON because we may call initRes again
+n=n0
 
 ;print pwr %pwr[2]% %pwr[3]% %pwr[4]%
 ;print n1=%0n1% r1 %0r1[1]% %0r1[2]% %0r1[3]%
@@ -78,8 +83,9 @@ print TEST %lky% <-2490<-1660<-700 >2690>1860>200 cso:%cso% (n0:%0n0% %0r0[1]%-%
 if ((n0==1 and cso<750) or (n0==2 and cso<1500) or (n0==3 and cso<2250))
 {
 ; dhot=1
- print Cumulus is HOT. Sleep 15m
+ print Cumulus is HOT. Sleep 15m. WebQ
  tmr=900
+ ->WebQuery http://192.168.1.8/?hot=1 GET
  break
 }
 
@@ -93,6 +99,7 @@ if (lky<-2490 and n1==3)
  =>Power3 0
  =>Power4 0
  tmr=60
+ =#sendNbRes(3)
  break
 }
 ; 2 on
@@ -103,6 +110,7 @@ if (lky<-1660 and n1>=2)
  =#initRes
  =#pwrRndOff
  tmr=60
+ =#sendNbRes(n+2)
  break
 }
 ; 1 on
@@ -110,6 +118,7 @@ if (lky<-700 and n1>=1)
 {
  =#pwrRndOff
  tmr=60
+ =#sendNbRes(n+1)
  break
 }
 
@@ -123,6 +132,7 @@ if (lky>2690 and n0==3)
  =>Power3 1
  =>Power4 1
  tmr=60
+ =#sendNbRes(0)
  break
 }
 ; 2 off
@@ -133,6 +143,7 @@ if (lky>1860 and n0>=2)
  =#initRes
  =#pwrRndOn
  tmr=60
+ =#sendNbRes(n-2)
  break
 }
 ; 1 off
@@ -140,6 +151,7 @@ if (lky>200 and n0>=1)
 {
  =#pwrRndOn
  tmr=60
+ =#sendNbRes(n-1)
  break
 }
 
@@ -164,7 +176,9 @@ next
 pic=r1[1+rnd(n1)]
 =>Power%0pic% 0
 
-;;;
 #pwrRndOn
 pic=r0[1+rnd(n0)]
 =>Power%0pic% 1
+
+#sendNbRes(n)
+->WebQuery http://192.168.1.8/?nbres=%0n% GET

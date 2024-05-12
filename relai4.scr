@@ -9,6 +9,7 @@
 
 http=0
 preh=0
+sun=0
 ;has been hot once in day
 dhot=0
 lky=0
@@ -36,17 +37,26 @@ t:tmr=0
 >S
 
 ; skip if not sun hours (4h-20h). or timer set
-if (upsecs%20==0 and tmr==0 and hours>=4 and hours<20)
+if (upsecs%20==0)
 {
 
-;print %hours% %preh%
-
-if (hours==4 and preh==3)
+if (sun==0 and time>sunrise)
 {
+ sun=1
  ; we also remove flag files in salon crontab
- print Sun day begin. dhot=0
+ print SunRise. dhot=0
  dhot=0
-} else {
+}
+if (sun==1 and time>sunset)
+{
+ sun=0
+ print SunSet. Turn off
+ =>Power2 1
+ =>Power3 1
+ =>Power4 1
+ =#resEvent(0)
+}
+
 if (hours==11 and preh==10 and dhot==0)
 {
  print Ensure 1 resistor ON. Lock it
@@ -67,17 +77,16 @@ if (hours==19 and preh==18)
  lck=0
 }
 }
-}
 preh=hours
 
 ; may be set by resEvent
-if tmr>0 {
- break
+if (tmr==0 and time>sunrise and time<sunset)
+{
+ ; get shelly data
+ http=1
+ http("192.168.1.19" "/status")
+ http=0
 }
-
-http=1
-http("192.168.1.19" "/status")
-http=0
 
 }
 
@@ -101,7 +110,7 @@ lky=gwr("\"power\":" 2 ,)
 prd=gwr("\"power\":" 3 ,)
 cso=lky+prd
 
-print TEST %lky% <-2490<-1660<-700 >2690>1860>200 cso:%cso% lck:%0lck% (n0:%0n0% %0r0[1]%-%0r0[2]%-%0r0[3]%) (n1:%0n1% %0r1[1]%-%0r1[2]%-%0r1[3]%)
+print TEST %lky% <-2490<-1660<-700 >2690>1860>200 cso:%0cso% lck:%0lck% (n0:%0n0% %0r0[1]%-%0r0[2]%-%0r0[3]%) (n1:%0n1% %0r1[1]%-%0r1[2]%-%0r1[3]%)
 
 ; mean resistance power: 830
 

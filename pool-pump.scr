@@ -1,0 +1,124 @@
+>D
+
+;pump minutes (permanent var?)
+pm=0
+;pm target: 4h
+pmt=240
+
+lky=0
+; 7 minutes of linky records. set also for loop size bellow!
+m:lkys=0 7
+http=0
+
+; timer used to pause execution a few secs to disable flapping
+; if timer is not null. pause
+t:tmr=0
+
+;parameter or index
+i=0
+
+; the cumulus is OK. other loads can use energy. ie pool pump
+g:cuOk=0
+
+;;;;;;;;;;;;;;;;;;;;;;;;
+>G
+print Received cuOk=%cuOk%
+
+;;;;;;;;;;;;;;;;;;;;;;;;
+>S
+
+;if upsecs%60==0
+if upsecs%10!=0 {
+ break
+}
+
+;print 10sec
+
+; reset pump minutes at midnight
+; increment if power on
+if time<2 {
+ pm=0
+ ; reset cuOk (though it's the responsibility of the tasmota cumulus)
+ cuOk=0
+} else {
+if pwr[1]==1 {
+ pm+=1
+}
+}
+
+lky=0
+; only get metrics and operate during sun hours
+; in non sun hours we will insert zeros
+if (time>sunrise and time<sunset)
+{
+ http=1
+ http("192.168.1.19" "/emeter/0")
+ http=0
+}
+; insert into array even at night
+lkys=lky
+
+if tmr!=0 or time<sunrise or time>sunset {
+ break
+}
+
+print pwr:%0pwr[1]% cuOk:%0cuOk% pm:%0pm% lky:%lky% <-250 >100 [%lkys[1]% %lkys[2]% %lkys[3]% %lkys[4]% %lkys[5]% %lkys[6]% %lkys[7]%]
+
+; block to set pump ON
+if (pwr[1]==0 and cuOk==1 and pm<pmt)
+{
+ ;get max. ignore zero values
+ lky=-99999
+ for i 1 7 1
+  if (lkys[i]!=0 and lkys[i]>lky)
+  {
+   lky=lkys[i]
+  }
+ next
+ print max:%lky%
+
+ if lky<-250 {
+  =#setPump(1)
+ }
+
+; block to set pump OFF
+} else {
+if pwr[1]==1
+{
+ if (cuOk==0 or pm>pmt)
+ {
+  =#setPump(0)
+
+ } else {
+  ;get min
+  lky=99999
+  for i 1 7 1
+   if (lkys[i]!=0 and lkys[i]<lky)
+   {
+    lky=lkys[i]
+   }
+  next
+  print min:%lky%
+
+  if lky>100 {
+   =#setPump(0)
+  }
+ }
+}
+
+;;;;;;;;;;;;;;;;;;;;;;;;
+>E
+; be sure the event is our http req
+if http==1 {
+ http=0
+} else {
+ break
+}
+
+lky=gwr("\"power\":" 2 ,)
+
+;;;;;;;;;;;;;;;;;;;;;;;;
+#setPump(i)
+print Set pump %0i%. Wait 10m
+=>Power %0i%
+tmr=600

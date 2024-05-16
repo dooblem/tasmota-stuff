@@ -43,7 +43,7 @@ g:cuOk=0
 if (upsecs%20==0)
 {
 
-if (sun==0 and time>sunrise)
+if (sun==0 and time>sunrise and time<sunset)
 {
  sun=1
  ;;;;; we also remove flag files in salon crontab

@@ -33,6 +33,9 @@ n=0
 ; if timer is not null. pause
 t:tmr=0
 
+; the cumulus is OK. other loads can use energy. ie pool pump
+g:cuOk=0
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;
 >S
 
@@ -43,9 +46,12 @@ if (upsecs%20==0)
 if (sun==0 and time>sunrise)
 {
  sun=1
- ; we also remove flag files in salon crontab
- print SunRise. dhot=0
+ ;;;;; we also remove flag files in salon crontab
+ print SunRise. dhot=0 cuOk=0
  dhot=0
+ ; reset udp global var. x2 qos
+ cuOk=0
+ cuOk=0
 }
 if (sun==1 and time>sunset)
 {
@@ -128,7 +134,10 @@ if ((n==1 and cso<750) or (n==2 and cso<1500) or (n==3 and cso<2250))
  dhot=1
  print Cumulus is HOT. Sleep 15m. WebQ
  tmr=900
- ->WebQuery http://192.168.1.8/?hot=1 GET
+ ;->WebQuery http://192.168.1.8/?hot=1 GET
+ ;set global udp var. x2 for qos
+ cuOk=1
+ cuOk=1
  break
 }
 
@@ -222,4 +231,13 @@ pic=r0[1+rnd(n0)]
 
 #resEvent(n)
 tmr=60
-->WebQuery http://192.168.1.8/?nbres=%0n% GET
+;set global udp var. x2 for qos
+if (dhot==1 or n==3)
+{
+ cuOk=1
+ cuOk=1
+} else {
+ cuOk=0
+ cuOk=0
+}
+;->WebQuery http://192.168.1.8/?nbres=%0n% GET

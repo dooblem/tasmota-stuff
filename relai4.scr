@@ -62,7 +62,7 @@ if (hours==11 and preh==10 and dhot==0)
  print Ensure 1 resistor ON. Lock it
  ; if no res ON, turn ON one. else pick a random res ON
  =#initRes
- if r0==0 {
+ if n0==0 {
   =#pwrRndOff
   lck=pic
   =#resEvent(1)

@@ -132,8 +132,9 @@ if lck==0 {
 if ((n==1 and cso<750) or (n==2 and cso<1500) or (n==3 and cso<2250))
 {
  dhot=1
- print Cumulus is HOT. Sleep 15m. WebQ
+ print Cumulus is HOT. unlock. cuOk=1. Sleep 15m
  tmr=900
+ lck=0
  ;->WebQuery http://192.168.1.8/?hot=1 GET
  ;set global udp var. x2 for qos
  cuOk=1

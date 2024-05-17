@@ -27,8 +27,7 @@ print Received cuOk=%cuOk%
 ;;;;;;;;;;;;;;;;;;;;;;;;
 >S
 
-;if upsecs%60==0
-if upsecs%10!=0 {
+if upsecs%60!=0 {
  break
 }
 
@@ -58,7 +57,10 @@ if (time>sunrise and time<sunset)
 ; insert into array even at night
 lkys=lky
 
-if tmr!=0 or time<sunrise or time>sunset {
+;print pwr:%0pwr[1]% cuOk:%0cuOk% pm:%0pm% lky:%lky% <-250 >100 [%lkys[1]% %lkys[2]% %lkys[3]% %lkys[4]% %lkys[5]% %lkys[6]% %lkys[7]%]
+
+if (tmr!=0 or time<sunrise or time>sunset)
+{
  break
 }
 

@@ -2,8 +2,11 @@
 
 ;pump minutes (permanent var?)
 pm=0
-;pm target: 4h
-pmt=240
+;pm daily target
+pmt=0
+
+;pump target by month
+m:mo=0 12
 
 lky=0
 ; 7 minutes of linky records. set also for loop size bellow!
@@ -13,6 +16,8 @@ http=0
 ; timer used to pause execution a few secs to disable flapping
 ; if timer is not null. pause
 t:tmr=0
+; previous hour
+preh=0
 
 ;parameter or index
 i=0
@@ -24,6 +29,22 @@ g:cuOk=0
 >G
 print Received cuOk=%cuOk%
 
+;;;;;;;;;;;;;;;;;;;;;;;; on script start
+>R
+mo[1]=1
+mo[2]=1
+mo[3]=2
+mo[4]=3.5
+mo[5]=5
+mo[6]=9
+mo[7]=10
+mo[8]=10
+mo[9]=8
+mo[10]=6
+mo[11]=2
+mo[12]=1
+=#setPmt
+
 ;;;;;;;;;;;;;;;;;;;;;;;;
 >S
 
@@ -31,18 +52,19 @@ if upsecs%60!=0 {
  break
 }
 
-;print 10sec
-
-; reset pump minutes at midnight
-; increment if power on
-if time<2 {
+if (hours==0 and preh==23)
+{
+ print New day
  pm=0
+ =#setPmt
  ; reset cuOk (though it's the responsibility of the tasmota cumulus)
  cuOk=0
-} else {
+}
+preh=hours
+
+; increment mins if power on
 if pwr[1]==1 {
  pm+=1
-}
 }
 
 lky=0
@@ -122,3 +144,7 @@ lky=gwr("\"power\":" 2 ,)
 print Set pump %0i%. Wait 10m
 =>Power %0i%
 tmr=600
+
+#setPmt
+pmt=mo[month]*60
+print Pump mins target today: %0pmt%

@@ -30,7 +30,7 @@ g:cuOk=0
 print Received cuOk=%cuOk%
 
 ;;;;;;;;;;;;;;;;;;;;;;;; on script start
->R
+>B
 mo[1]=1
 mo[2]=1
 mo[3]=2
@@ -84,7 +84,7 @@ if (tmr!=0 or time<sunrise or time>sunset)
  break
 }
 
-print pwr:%0pwr[1]% cuOk:%0cuOk% pm:%0pm% lky:%lky% [%lkys[1]% %lkys[2]% %lkys[3]% %lkys[4]% %lkys[5]% %lkys[6]% %lkys[7]%] <-250 >100
+print pwr:%0pwr[1]% cuOk:%0cuOk% pm:%0pm%<%0pmt% lky:%lky% [%lkys[1]% %lkys[2]% %lkys[3]% %lkys[4]% %lkys[5]% %lkys[6]% %lkys[7]%] <-250 >100
 
 ; block to set pump ON
 if (pwr[1]==0 and cuOk==1 and pm<pmt)

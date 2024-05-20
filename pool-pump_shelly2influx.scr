@@ -1,21 +1,39 @@
 >D 40
 
+;shelly ip address
+ip="__SHELLY_IP__"
+
+; table of linky records: 7 minutes. you should update {print lkys list} bellow as well.
+m:lkys=0 7
+
+; force hour
+fh=11
+
+; linky limit value to turn ON
+lkyON=-250
+; linky limit value to turn OFF
+lkyOFF=100
+
+; seconds to wait after ON/OFF
+wait=600
+
+; Other info to fill bellow:
+; {influxdb info}
+; {lky}
+
+;;;;;;;;;
+
 ;pump minutes (permanent var?)
 pm=0
 ;pm yesterday
 pmy=0
-
 ;pm daily target (max)
 pmt=0
-
 ;pump target by month
 m:mo=0 12
 
 lky=0
-; 7 minutes of linky records. set also for loop size bellow!
-m:lkys=0 7
 http=0
-
 ; timer used to pause execution a few secs to disable flapping
 ; if timer is not null. pause
 t:tmr=0
@@ -60,6 +78,7 @@ mo[12]=1
 ;;;;;;;;;;;;;;;;;;;;;;;;
 >S
 
+; every 30s: new day, get shelly values
 if upsecs%30!=0 {
  break
 }
@@ -86,9 +105,10 @@ lky=0
 ; http=0
 ;}
 http=1
-http("192.168.1.X" "/status")
+http(ip "/status")
 http=0
 
+; every 60s: insert in lkys array, count pump minutes, pump management
 if upsecs%60!=0 {
  break
 }
@@ -100,14 +120,17 @@ if pwr[1]==1 {
  pm+=1
 }
 
+; pump management when timer ok, and sun hours
 if (tmr!=0 or time<sunrise or time>sunset)
 {
  break
 }
 
-print pwr:%0pwr[1]% cuOk:%0cuOk% pm:%0pm%+%0pmy%<%0pmt% lky:%lky% [%lkys[1]% %lkys[2]% %lkys[3]% %lkys[4]% %lkys[5]% %lkys[6]% %lkys[7]%] <-250 >100
+; {print lkys list: update to match lkys size}
+print pwr:%0pwr[1]% cuOk:%0cuOk% pm:%0pm%+%0pmy%<%0pmt% lky:%lky% [%lkys[1]% %lkys[2]% %lkys[3]% %lkys[4]% %lkys[5]% %lkys[6]% %lkys[7]%] <%0lkyON% >%0lkyOFF%
 
-if (hours>11 and pm+pmy<pmt)
+; if force hour passed and pump mins today+yesterday not reached, force ON
+if (hours>fh and pm+pmy<pmt)
 {
  if pwr[1]==0 {
   print Force pump ON
@@ -121,7 +144,7 @@ if (pwr[1]==0 and cuOk==1 and pm<pmt)
 {
  ;get max. ignore zero values
  lky=-99999
- for i 1 7 1
+ for i 1 lkys[-1] 1
   if (lkys[i]!=0 and lkys[i]>lky)
   {
    lky=lkys[i]
@@ -129,7 +152,7 @@ if (pwr[1]==0 and cuOk==1 and pm<pmt)
  next
  print max:%lky%
 
- if lky<-250 {
+ if lky<lkyON {
   =#setPump(1)
  }
 
@@ -144,7 +167,7 @@ if pwr[1]==1
  } else {
   ;get min
   lky=99999
-  for i 1 7 1
+  for i 1 lkys[-1] 1
    if (lkys[i]!=0 and lkys[i]<lky)
    {
     lky=lkys[i]
@@ -152,7 +175,7 @@ if pwr[1]==1
   next
   print min:%lky%
 
-  if lky>100 {
+  if lky>lkyOFF {
    =#setPump(0)
   }
  }
@@ -179,16 +202,18 @@ tr1=st(tr1 '}' 1)
 
 print shellyem 0.power=%p0% 0.total=%t0% 0.total_returned=%tr0% 1.power=%p1% 1.total=%t1% 1.total_returned=%tr1%
 
-->WebQuery http://www.example.com/write?db=mydb&precision=s POST [X-Key:XXXXXXX]shellyem 0.power=%p0%,0.total=%t0%,0.total_returned=%tr0%,1.power=%p1%,1.total=%t1%,1.total_returned=%tr1%
+; {influxdb info: fill in bellow}
+->WebQuery http://__GRAFANA_HOST__/write?db=jlma&precision=s POST [X-Key:__XKEY__]shellyem 0.power=%p0%,0.total=%t0%,0.total_returned=%tr0%,1.power=%p1%,1.total=%t1%,1.total_returned=%tr1%
 
+; {lky: p0 if linky value is on the 1st clamp, p1 if on 2nd clamp}
 lky=p0
 ;lky=gwr("\"power\":" 2 ,)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;
 #setPump(i)
-print Set pump %0i%. Wait 10m
+print Set pump %0i%. Wait %0wait%s
 =>Power %0i%
-tmr=600
+tmr=wait
 
 #setPmt
 pmt=mo[month]*60

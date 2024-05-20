@@ -1,0 +1,181 @@
+>D 40
+
+;pump minutes (permanent var?)
+pm=0
+;pm daily target
+pmt=0
+
+;pump target by month
+m:mo=0 12
+
+lky=0
+; 7 minutes of linky records. set also for loop size bellow!
+m:lkys=0 7
+http=0
+
+; timer used to pause execution a few secs to disable flapping
+; if timer is not null. pause
+t:tmr=0
+; previous hour
+preh=0
+
+;parameter or index
+i=0
+
+; the cumulus is OK. other loads can use energy. ie pool pump
+;g:cuOk=0
+cuOk=1
+
+;from shelly2influx
+p0=""
+t0=""
+tr0=""
+p1=""
+t1=""
+tr1=""
+
+;;;;;;;;;;;;;;;;;;;;;;;;
+;>G
+;print Received cuOk=%cuOk%
+
+;;;;;;;;;;;;;;;;;;;;;;;; on script start
+>B
+mo[1]=1
+mo[2]=1
+mo[3]=2
+mo[4]=3.5
+mo[5]=5
+mo[6]=9
+mo[7]=10
+mo[8]=10
+mo[9]=8
+mo[10]=6
+mo[11]=2
+mo[12]=1
+=#setPmt
+
+;;;;;;;;;;;;;;;;;;;;;;;;
+>S
+
+if upsecs%30!=0 {
+ break
+}
+
+if (hours==0 and preh==23)
+{
+ print New day
+ pm=0
+ =#setPmt
+ ; reset cuOk (though it's the responsibility of the tasmota cumulus)
+ ;cuOk=0
+}
+preh=hours
+
+; increment mins if power on
+if pwr[1]==1 {
+ pm+=1
+}
+
+lky=0
+;; only get metrics and operate during sun hours
+;; in non sun hours we will insert zeros
+;if (time>sunrise and time<sunset)
+;{
+; http=1
+; http("192.168.1.X" "/emeter/0")
+; http=0
+;}
+http=1
+http("192.168.1.X" "/status")
+http=0
+
+if upsecs%60!=0 {
+ break
+}
+; insert into array even at night
+lkys=lky
+
+if (tmr!=0 or time<sunrise or time>sunset)
+{
+ break
+}
+
+print pwr:%0pwr[1]% cuOk:%0cuOk% pm:%0pm% lky:%lky% [%lkys[1]% %lkys[2]% %lkys[3]% %lkys[4]% %lkys[5]% %lkys[6]% %lkys[7]%] <-250 >100
+
+; block to set pump ON
+if (pwr[1]==0 and cuOk==1 and pm<pmt)
+{
+ ;get max. ignore zero values
+ lky=-99999
+ for i 1 7 1
+  if (lkys[i]!=0 and lkys[i]>lky)
+  {
+   lky=lkys[i]
+  }
+ next
+ print max:%lky%
+
+ if lky<-250 {
+  =#setPump(1)
+ }
+
+; block to set pump OFF
+} else {
+if pwr[1]==1
+{
+ if (cuOk==0 or pm>pmt)
+ {
+  =#setPump(0)
+
+ } else {
+  ;get min
+  lky=99999
+  for i 1 7 1
+   if (lkys[i]!=0 and lkys[i]<lky)
+   {
+    lky=lkys[i]
+   }
+  next
+  print min:%lky%
+
+  if lky>100 {
+   =#setPump(0)
+  }
+ }
+}
+
+;;;;;;;;;;;;;;;;;;;;;;;;
+>E
+; be sure the event is our http req
+if http==1 {
+ http=0
+} else {
+ break
+}
+
+p0=gwr("\"power\":" 2 ,)
+t0=gwr("\"total\":" 2 ,)
+tr0=gwr("\"total_returned\":" 2 ,)
+tr0=st(tr0 '}' 1)
+
+p1=gwr("\"power\":" 3 ,)
+t1=gwr("\"total\":" 3 ,)
+tr1=gwr("\"total_returned\":" 3 ,)
+tr1=st(tr1 '}' 1)
+
+print shellyem 0.power=%p0% 0.total=%t0% 0.total_returned=%tr0% 1.power=%p1% 1.total=%t1% 1.total_returned=%tr1%
+
+->WebQuery http://www.example.com/write?db=mydb&precision=s POST [X-Key:XXXXXXX]shellyem 0.power=%p0%,0.total=%t0%,0.total_returned=%tr0%,1.power=%p1%,1.total=%t1%,1.total_returned=%tr1%
+
+lky=p0
+;lky=gwr("\"power\":" 2 ,)
+
+;;;;;;;;;;;;;;;;;;;;;;;;
+#setPump(i)
+print Set pump %0i%. Wait 10m
+=>Power %0i%
+tmr=600
+
+#setPmt
+pmt=mo[month]*60
+print Pump mins target today: %0pmt%

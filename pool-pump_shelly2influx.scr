@@ -2,7 +2,10 @@
 
 ;pump minutes (permanent var?)
 pm=0
-;pm daily target
+;pm yesterday
+pmy=0
+
+;pm daily target (max)
 pmt=0
 
 ;pump target by month
@@ -64,17 +67,14 @@ if upsecs%30!=0 {
 if (hours==0 and preh==23)
 {
  print New day
+ ;save minutes into yesterday. reset today minutes
+ pmy=pm
  pm=0
  =#setPmt
  ; reset cuOk (though it's the responsibility of the tasmota cumulus)
  ;cuOk=0
 }
 preh=hours
-
-; increment mins if power on
-if pwr[1]==1 {
- pm+=1
-}
 
 lky=0
 ;; only get metrics and operate during sun hours
@@ -95,12 +95,26 @@ if upsecs%60!=0 {
 ; insert into array even at night
 lkys=lky
 
+; increment mins if power on
+if pwr[1]==1 {
+ pm+=1
+}
+
 if (tmr!=0 or time<sunrise or time>sunset)
 {
  break
 }
 
-print pwr:%0pwr[1]% cuOk:%0cuOk% pm:%0pm%<%0pmt% lky:%lky% [%lkys[1]% %lkys[2]% %lkys[3]% %lkys[4]% %lkys[5]% %lkys[6]% %lkys[7]%] <-250 >100
+print pwr:%0pwr[1]% cuOk:%0cuOk% pm:%0pm%+%0pmy%<%0pmt% lky:%lky% [%lkys[1]% %lkys[2]% %lkys[3]% %lkys[4]% %lkys[5]% %lkys[6]% %lkys[7]%] <-250 >100
+
+if (hours>11 and pm+pmy<pmt)
+{
+ if pwr[1]==0 {
+  print Force pump ON
+  =#setPump(1)
+ }
+ break
+}
 
 ; block to set pump ON
 if (pwr[1]==0 and cuOk==1 and pm<pmt)
@@ -178,4 +192,4 @@ tmr=600
 
 #setPmt
 pmt=mo[month]*60
-print Pump mins target today: %0pmt%
+print Pump minutes target today: %0pmt%

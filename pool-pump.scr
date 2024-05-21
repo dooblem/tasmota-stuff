@@ -87,7 +87,7 @@ lky=0
 if (time>sunrise and time<sunset)
 {
  http=1
- http("192.168.1.19" "/emeter/0")
+ http("__SHELLY_IP__" "/emeter/0")
  http=0
 }
 ; insert into array even at night

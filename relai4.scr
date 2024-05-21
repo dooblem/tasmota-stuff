@@ -1,11 +1,4 @@
 >D
-; debut journee. hotday=false
-; si n > 0 and conso < 700 => fin chauffe, hotday=true
-; watt<700 and n<3 => UP
-; watt >200 and n>0 => DOWN
-
-; à 11h. si hotday=false, on force 1res
-; si hot. hotday=true. on deverrouille
 
 http=0
 preh=0
@@ -90,7 +83,7 @@ if (tmr==0 and time>sunrise and time<sunset)
 {
  ; get shelly data
  http=1
- http("192.168.1.19" "/status")
+ http("__SHELLY_IP__" "/status")
  http=0
 }
 

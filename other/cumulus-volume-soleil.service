@@ -1,0 +1,13 @@
+[Unit]
+Description=Pilotage Cumulus Soleil
+After=multi-user.target
+
+[Service]
+ExecStart=/home/maurice/bin/cumulus-volume-soleil-wrapper.sh
+WorkingDirectory=/home/maurice/bin
+User=maurice
+Restart=always
+RestartSec=30
+
+[Install]
+WantedBy=multi-user.target

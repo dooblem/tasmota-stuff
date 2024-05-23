@@ -197,9 +197,9 @@ if (lky>1860 and n0>=2)
 }
 ; 1 off
 ; n*700+50>prd - off if we are over production
-if ((lky>200 and n0>=1) or (n*700+50>prd)
+if (n0>=1 and (lky>200 or n*700+50>prd))
 {
- if (lky<=200 or n0<1)
+ if (lky<=200)
  {
   print FORCE 1off prd
  }

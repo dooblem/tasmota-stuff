@@ -32,9 +32,10 @@ g:cuOk=0
 ;;;;;;;;;;;;;;;;;;;;;;;;;;
 >S
 
-; skip if not sun hours (4h-20h). or timer set
-if (upsecs%20==0)
-{
+; every 20s
+if upsecs%20!=0 {
+ break
+}
 
 if (sun==0 and time>sunrise and time<sunset)
 {
@@ -78,15 +79,13 @@ if (hours==19 and preh==18)
 }
 preh=hours
 
-; may be set by resEvent
+; only in sun hours when no timer set
 if (tmr==0 and time>sunrise and time<sunset)
 {
  ; get shelly data
  http=1
  http("__SHELLY_IP__" "/status")
  http=0
-}
-
 }
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;

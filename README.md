@@ -24,3 +24,9 @@ The switch bellow can be used to cut the power on the relay, to get hot water ra
 Avoid using the first relay: not a big deal, but it may flap a bit when booting. Apparently there is a hardware glitch. It's documented somewhere in a Tasmota issue.
 
 I'm using a [Shelly](https://www.shelly.com) EM (Electric Meter) with 2 power clamps: 1st on house consumption/feed-in, 2nd on solar production.
+
+And here is the result on a not so sunny day (2024-05-15, Toulouse, 5.5kw peak) (water heater power is in black color):
+![Grafana not so sunny day](/img/grafana.png)
+
+And on a realy bad day, one resistor is locked ON in the middle of the day (2024-04-15):
+![Grafana not so sunny day](/img/grafana-bad-day.png)

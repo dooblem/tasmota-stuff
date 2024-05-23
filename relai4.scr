@@ -108,7 +108,7 @@ lky=gwr("\"power\":" 2 ,)
 prd=gwr("\"power\":" 3 ,)
 cso=lky+prd
 
-print TEST %lky% <-2490<-1660<-700 >2690>1860>200 cso:%0cso% lck:%0lck% (n0:%0n0% %0r0[1]%-%0r0[2]%-%0r0[3]%) (n1:%0n1% %0r1[1]%-%0r1[2]%-%0r1[3]%)
+print TEST %lky% <-2490<-1660<-700 >2690>1860>200 prd:%0prd% cso:%0cso% lck:%0lck% (n0:%0n0% %0r0[1]%-%0r0[2]%-%0r0[3]%) (n1:%0n1% %0r1[1]%-%0r1[2]%-%0r1[3]%)
 
 ; mean resistance power: 830
 
@@ -148,7 +148,12 @@ if (lky<-2490 and n1==3)
 }
 ; 2 on
 ; 830*2=1660
-if (lky<-1660 and n1>=2)
+; (n+2)*830+50<prd - do not start resistor over production
+if (lky<-1660 and n1>=2 and n+2*830+50>=prd)
+{
+ print SKIP 2on prd
+}
+if (lky<-1660 and n1>=2 and n+2*830+50<prd)
 {
  =#pwrRndOff
  =#initRes
@@ -157,7 +162,11 @@ if (lky<-1660 and n1>=2)
  break
 }
 ; 1 on
-if (lky<-700 and n1>=1)
+if (lky<-700 and n1>=1 and n+1*700+50>=prd)
+{
+ print SKIP 1on prd
+}
+if (lky<-700 and n1>=1 and n+1*700+50<prd)
 {
  =#pwrRndOff
  =#resEvent(n+1)
@@ -187,8 +196,13 @@ if (lky>1860 and n0>=2)
  break
 }
 ; 1 off
-if (lky>200 and n0>=1)
+; n*700+50>prd - off if we are over production
+if ((lky>200 and n0>=1) or (n*700+50>prd)
 {
+ if (lky<=200 or n0<1)
+ {
+  print FORCE 1off prd
+ }
  =#pwrRndOn
  =#resEvent(n-1)
  break

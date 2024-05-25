@@ -6,6 +6,8 @@ sun=0
 ;has been hot once in day
 dhot=0
 lky=0
+;previous lky value
+lkyp=0
 prd=0
 cso=0
 i=0
@@ -103,6 +105,7 @@ if http==1 {
 ;print n1=%0n1% r1 %0r1[1]% %0r1[2]% %0r1[3]%
 ;print n0=%0n0% r0 %0r0[1]% %0r0[2]% %0r0[3]%
 
+lkyp=lky
 ; delim power. get 2nd field. comma as limit
 lky=gwr("\"power\":" 2 ,)
 prd=gwr("\"power\":" 3 ,)
@@ -135,10 +138,11 @@ if ((n==1 and cso<750) or (n==2 and cso<1500) or (n==3 and cso<2250))
 }
 
 ;;; turn on. off instead
+; use previous lky val to be sure we are really injecting
 
 ; 3 on
 ; 830*3=2490
-if (lky<-2490 and n1==3)
+if (lky<-2490 and lkyp<-2490 and n1==3)
 {
  =>Power2 0
  =>Power3 0
@@ -149,11 +153,11 @@ if (lky<-2490 and n1==3)
 ; 2 on
 ; 830*2=1660
 ; (n+2)*830+50<prd - do not start resistor over production
-if (lky<-1660 and n1>=2 and n+2*830+50>=prd)
+if (lky<-1660 and lkyp<-1660 and n1>=2 and n+2*830+50>=prd)
 {
  print SKIP 2on prd
 }
-if (lky<-1660 and n1>=2 and n+2*830+50<prd)
+if (lky<-1660 and lkyp<-1660 and n1>=2 and n+2*830+50<prd)
 {
  =#pwrRndOff
  =#initRes
@@ -162,11 +166,11 @@ if (lky<-1660 and n1>=2 and n+2*830+50<prd)
  break
 }
 ; 1 on
-if (lky<-700 and n1>=1 and n+1*700+50>=prd)
+if (lky<-700 and lkyp<-700 and n1>=1 and n+1*700+50>=prd)
 {
  print SKIP 1on prd
 }
-if (lky<-700 and n1>=1 and n+1*700+50<prd)
+if (lky<-700 and lkyp<-700 and n1>=1 and n+1*700+50<prd)
 {
  =#pwrRndOff
  =#resEvent(n+1)

@@ -73,7 +73,6 @@ mo[9]=8
 mo[10]=6
 mo[11]=2
 mo[12]=1
-=#setPmt
 
 ;;;;;;;;;;;;;;;;;;;;;;;;
 >S
@@ -82,18 +81,6 @@ mo[12]=1
 if upsecs%30!=0 {
  break
 }
-
-if (hours==0 and preh==23)
-{
- print New day
- ;save minutes into yesterday. reset today minutes
- pmy=pm
- pm=0
- =#setPmt
- ; reset cuOk (though it's the responsibility of the tasmota cumulus)
- ;cuOk=0
-}
-preh=hours
 
 lky=0
 ;; only get metrics and operate during sun hours
@@ -114,6 +101,24 @@ if upsecs%60!=0 {
 }
 ; insert into array even at night
 lkys=lky
+
+; initialize pm target. will run once at boot
+; not working in >B because month is not set yet
+if pmt==0 {
+ =#setPmt
+}
+
+if (hours==0 and preh==23)
+{
+ print New day
+ ;save minutes into yesterday. reset today minutes
+ pmy=pm
+ pm=0
+ =#setPmt
+ ; reset cuOk (though it's the responsibility of the tasmota cumulus)
+ ;cuOk=0
+}
+preh=hours
 
 ; increment mins if power on
 if pwr[1]==1 {

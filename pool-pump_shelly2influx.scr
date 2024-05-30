@@ -208,7 +208,7 @@ tr1=st(tr1 '}' 1)
 print shellyem 0.power=%p0% 0.total=%t0% 0.total_returned=%tr0% 1.power=%p1% 1.total=%t1% 1.total_returned=%tr1%
 
 ; {influxdb info: fill in bellow}
-->WebQuery __GRAFANA_URL__ POST [X-Key:__XKEY__]shellyem 0.power=%p0%,0.total=%t0%,0.total_returned=%tr0%,1.power=%p1%,1.total=%t1%,1.total_returned=%tr1%
+->WebQuery __GRAFANA_URL__ POST [X-Key:__XKEY__]shellyem 0.power=%p0%,0.total=%t0%,0.total_returned=%tr0%,1.power=%p1%,1.total=%t1%,1.total_returned=%tr1%\npoolpump power=%1enrg[7]%,total=%5enrg[0]%
 
 ; {lky: p0 if linky value is on the 1st clamp, p1 if on 2nd clamp}
 lky=p0

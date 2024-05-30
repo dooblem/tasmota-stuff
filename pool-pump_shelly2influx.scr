@@ -1,27 +1,37 @@
 >D 40
 
+;;; VALEURS À MODIFIER CI-DESSOUS
+
 ;shelly ip address
+; Adresse ip du shelly
 ip="__SHELLY_IP__"
 
-; table of linky records: 7 minutes. you should update {print lkys list} bellow as well.
-m:lkys=0 7
+; linky limit value to turn ON
+; puissance linky ON
+lkyON=-700
+; linky limit value to turn OFF
+; puissance linky OFF
+lkyOFF=50
 
 ; force hour
+; heure à laquelle on force la pompe
 fh=11
 
-; linky limit value to turn ON
-lkyON=-250
-; linky limit value to turn OFF
-lkyOFF=100
-
 ; seconds to wait after ON/OFF
-wait=600
+; temps min attente entre chaque ON/OFF
+wait=300
+
+;;; FIN VALEURS À MODIFIER
+; temps pompe par mois: voir lignes mo[ plus bas dans le program
 
 ; Other info to fill bellow:
 ; {influxdb info}
 ; {lky}
 
 ;;;;;;;;;
+
+; table of linky records: 7 minutes. you should update {print lkys list} bellow as well.
+m:lkys=0 7
 
 ;pump minutes (permanent var?)
 pm=0
@@ -64,12 +74,12 @@ tr1=""
 mo[1]=1
 mo[2]=1
 mo[3]=2
-mo[4]=3.5
+mo[4]=3
 mo[5]=5
-mo[6]=9
-mo[7]=10
-mo[8]=10
-mo[9]=8
+mo[6]=7
+mo[7]=9
+mo[8]=9
+mo[9]=6
 mo[10]=6
 mo[11]=2
 mo[12]=1

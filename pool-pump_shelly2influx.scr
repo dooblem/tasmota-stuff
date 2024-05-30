@@ -34,6 +34,9 @@ wait=300
 ; table of linky records: 7 minutes. you should update {print lkys list} bellow as well.
 m:lkys=0 7
 
+; true if every 60s
+e6=0
+
 ;pump minutes (permanent var?)
 pm=0
 ;pm yesterday. set at high value at boot so that the pump will not be forced
@@ -88,37 +91,19 @@ mo[12]=1
 ;;;;;;;;;;;;;;;;;;;;;;;;
 >S
 
-; every 30s: new day, get shelly values
-if upsecs%30!=0 {
- break
-}
+; every 30s: get shelly values
+if upsecs%30==0 {
 
-lky=0
-;; only get metrics and operate during sun hours
-;; in non sun hours we will insert zeros
-;if (time>sunrise and time<sunset)
-;{
-; http=1
-; http("192.168.1.X" "/emeter/0")
-; http=0
-;}
-http=1
-http(ip "/status")
-http=0
-
-; every 60s: insert in lkys array, count pump minutes, pump management
-if upsecs%60!=0 {
- break
-}
-; insert into array even at night
-lkys=lky
-
+; every 60s
+if upsecs%60==0 {
+e6=1
 ; initialize pm target. will run once at boot
 ; not working in >B because month is not set yet
 if pmt==0 {
  =#setPmt
 }
 
+; at midnight
 if (hours==0 and preh==23)
 {
  print New day
@@ -135,6 +120,23 @@ preh=hours
 if pwr[1]==1 {
  pm+=1
 }
+
+} else {
+e6=0
+}
+
+; this is every 30s
+lky=0
+http=1
+http(ip "/status")
+http=0
+
+; this is after http req so maybe a few secs later so upsecs%60 KO
+; every 60s: insert in lkys array, pump management
+if e6==1 {
+
+; insert into array (even at night)
+lkys=lky
 
 ; pump management when timer ok, and sun hours
 if (tmr!=0 or time<sunrise or time>sunset)
@@ -195,6 +197,13 @@ if pwr[1]==1
    =#setPump(0)
   }
  }
+}
+}
+
+; end if e6 60s
+}
+
+; end if 30s
 }
 
 ;;;;;;;;;;;;;;;;;;;;;;;;

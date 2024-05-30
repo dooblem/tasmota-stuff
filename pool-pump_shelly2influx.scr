@@ -37,10 +37,12 @@ m:lkys=0 7
 ; true if every 60s
 e6=0
 
-;pump minutes (permanent var?)
-pm=0
-;pm yesterday. set at high value at boot so that the pump will not be forced
-pmy=9999
+; perm vars keep the order !
+;pump minutes
+p:pm=0
+;pm yesterday
+p:pmy=0
+
 ;pm daily target (max)
 pmt=0
 ;pump target by month

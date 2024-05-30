@@ -21,8 +21,9 @@ fh=11
 ;k; temps min attente entre chaque ON/OFF
 wait=300
 
-;k;;; FIN VALEURS A MODIFIER
 ;k; temps pompe par mois: voir lignes mo[ plus bas dans le program
+
+;k;;; FIN VALEURS A MODIFIER
 
 ; Other info to fill bellow:
 ; {influxdb info}

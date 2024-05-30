@@ -1,6 +1,8 @@
 #!/bin/bash
 # here is a simple script to upload a script to tasmota
 
+slimit=2560
+
 script="$1"
 ip="$2"
 
@@ -17,6 +19,11 @@ if [ -f "$sedFile" ]; then
 	done < "$sedFile"
 fi
 
+size=$(stat -c '%s' "/tmp/$0.tmp")
+if [ "$size" -gt "$slimit" ]; then
+	echo "script too big: $size > $slimit" && exit 2
+fi
+
 echo=""
 if [ "$ip" = "test" ]; then
 	echo="echo"
@@ -25,3 +32,5 @@ fi
 
 # --trace-ascii -
 $echo curl -v -F c1=on -F t1="</tmp/$0.tmp" -F save= "$ip/ta"
+
+echo "size: $size <= $slimit"

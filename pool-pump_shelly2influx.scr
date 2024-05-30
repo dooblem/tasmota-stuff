@@ -1,28 +1,28 @@
 >D 40
 
-;;; VALEURS À MODIFIER CI-DESSOUS
+;k;;; VALEURS A MODIFIER CI-DESSOUS
 
 ;shelly ip address
-; Adresse ip du shelly
+;k; Adresse ip du shelly
 ip="__SHELLY_IP__"
 
 ; linky limit value to turn ON
-; puissance linky ON
+;k; puissance linky ON
 lkyON=-700
 ; linky limit value to turn OFF
-; puissance linky OFF
+;k; puissance linky OFF
 lkyOFF=50
 
 ; force hour
-; heure à laquelle on force la pompe
+;k; heure a laquelle on force la pompe
 fh=11
 
 ; seconds to wait after ON/OFF
-; temps min attente entre chaque ON/OFF
+;k; temps min attente entre chaque ON/OFF
 wait=300
 
-;;; FIN VALEURS À MODIFIER
-; temps pompe par mois: voir lignes mo[ plus bas dans le program
+;k;;; FIN VALEURS A MODIFIER
+;k; temps pompe par mois: voir lignes mo[ plus bas dans le program
 
 ; Other info to fill bellow:
 ; {influxdb info}

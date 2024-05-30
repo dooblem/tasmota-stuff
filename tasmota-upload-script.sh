@@ -6,7 +6,8 @@ ip="$2"
 
 [ "$script" = "" -o "$ip" = "" ] && echo "Syntax $0 scriptFile tasmotaIp" && exit 1
 
-grep -v '^ *;' "$script" >/tmp/$0.tmp
+# comments to remove: line start, spaces, ';', but no 'k' otherwise we keep the comment
+grep -v '^ *;[^k]' "$script" >/tmp/$0.tmp
 
 sedFile=$(dirname $0)/sed.cnf
 if [ -f "$sedFile" ]; then

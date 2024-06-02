@@ -59,10 +59,6 @@ preh=0
 ;parameter or index
 i=0
 
-; the cumulus is OK. other loads can use energy. ie pool pump
-;g:cuOk=0
-cuOk=1
-
 ;from shelly2influx
 p0=""
 t0=""
@@ -71,9 +67,8 @@ p1=""
 t1=""
 tr1=""
 
-;;;;;;;;;;;;;;;;;;;;;;;;
-;>G
-;print Received cuOk=%cuOk%
+; mode auto ?
+au=1
 
 ;;;;;;;;;;;;;;;;;;;;;;;; on script start
 >B
@@ -89,6 +84,14 @@ mo[9]=6
 mo[10]=6
 mo[11]=2
 mo[12]=1
+
+>W
+bu(au "AUTO" "Manuel")
+
+Pompe Today : %0pm% mn
+Pompe Yesterday : %0pmy% mn
+Max jour : %0pmt% mn
+Force apres %0fh%h00 si %0pm%+%0pmy%<%0pmt%
 
 ;;;;;;;;;;;;;;;;;;;;;;;;
 >S
@@ -113,8 +116,6 @@ if (hours==0 and preh==23)
  pmy=pm
  pm=0
  =#setPmt
- ; reset cuOk (though it's the responsibility of the tasmota cumulus)
- ;cuOk=0
 }
 preh=hours
 
@@ -141,13 +142,13 @@ if e6==1 {
 lkys=lky
 
 ; pump management when timer ok, and sun hours
-if (tmr!=0 or time<sunrise or time>sunset)
+if (tmr!=0 or time<sunrise or time>sunset or au==0)
 {
  break
 }
 
 ; {print lkys list: update to match lkys size}
-print pwr:%0pwr[1]% cuOk:%0cuOk% pm:%0pm%+%0pmy%<%0pmt% lky:%lky% [%lkys[1]% %lkys[2]% %lkys[3]% %lkys[4]% %lkys[5]% %lkys[6]% %lkys[7]%] <%0lkyON% >%0lkyOFF%
+print pwr:%0pwr[1]% pm:%0pm%+%0pmy%<%0pmt% lky:%lky% [%lkys[1]% %lkys[2]% %lkys[3]% %lkys[4]% %lkys[5]% %lkys[6]% %lkys[7]%] <%0lkyON% >%0lkyOFF%
 
 ; if force hour passed and pump mins today+yesterday not reached, force ON
 if (hours>fh and pm+pmy<pmt)
@@ -160,7 +161,7 @@ if (hours>fh and pm+pmy<pmt)
 }
 
 ; block to set pump ON
-if (pwr[1]==0 and cuOk==1 and pm<pmt)
+if (pwr[1]==0 and pm<pmt)
 {
  ;get max. ignore zero values
  lky=-99999
@@ -180,7 +181,7 @@ if (pwr[1]==0 and cuOk==1 and pm<pmt)
 } else {
 if pwr[1]==1
 {
- if (cuOk==0 or pm>pmt)
+ if (pm>pmt)
  {
   =#setPump(0)
 
@@ -208,12 +209,21 @@ if pwr[1]==1
 ; end if 30s
 }
 
+;LedPower
+; in configuration, set gpio16 to LedLink
+; set gpio13 (LedLink) to Led_i
 ;;;;;;;;;;;;;;;;;;;;;;;;
 >E
 ; be sure the event is our http req
 if http==1 {
  http=0
 } else {
+ ; mode change
+ if au==1 {
+  ->LedPower 1
+ } else {
+  ->LedPower 0
+ }
  break
 }
 

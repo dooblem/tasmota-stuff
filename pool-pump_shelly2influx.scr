@@ -31,8 +31,8 @@ wait=300
 
 ;;;;;;;;;
 
-; table of linky records: 7 minutes. you should update {print lkys list} bellow as well.
-m:lkys=0 7
+; table of linky records: 5 minutes. you should update {print lkys list} bellow as well.
+m:lkys=0 5
 
 ; true if every 60s
 e6=0
@@ -148,7 +148,7 @@ if (tmr!=0 or time<sunrise or time>sunset or au==0)
 }
 
 ; {print lkys list: update to match lkys size}
-print pwr:%0pwr[1]% pm:%0pm%+%0pmy%<%0pmt% lky:%lky% [%lkys[1]% %lkys[2]% %lkys[3]% %lkys[4]% %lkys[5]% %lkys[6]% %lkys[7]%] <%0lkyON% >%0lkyOFF%
+print pwr:%0pwr[1]% pm:%0pm%+%0pmy%<%0pmt% lky:%lky% [%lkys[1]% %lkys[2]% %lkys[3]% %lkys[4]% %lkys[5]%] <%0lkyON% >%0lkyOFF%
 
 ; if force hour passed and pump mins today+yesterday not reached, force ON
 if (hours>fh and pm+pmy<pmt)

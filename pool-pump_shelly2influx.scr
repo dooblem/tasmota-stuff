@@ -31,9 +31,6 @@ wait=300
 
 ;;;;;;;;;
 
-; table of linky records: 5 minutes. you should update {print lkys list} bellow as well.
-m:lkys=0 5
-
 ; true if every 60s
 e6=0
 
@@ -56,7 +53,10 @@ t:tmr=0
 ; previous hour
 preh=0
 
-;parameter or index
+;counter to be sure we are bellow lkyON, or above lkyOFF (see bellow)
+cnt=0
+
+;parameter
 i=0
 
 ;from shelly2influx
@@ -140,11 +140,8 @@ http(ip "/status")
 http=0
 
 ; this is after http req so maybe a few secs later so upsecs%60 KO
-; every 60s: insert in lkys array, pump management
+; every 60s: pump management
 if e6==1 {
-
-; insert into array (even at night)
-lkys=lky
 
 ; pump management when timer ok, and sun hours
 if (tmr!=0 or time<sunrise or time>sunset or au==0)
@@ -152,8 +149,7 @@ if (tmr!=0 or time<sunrise or time>sunset or au==0)
  break
 }
 
-; {print lkys list: update to match lkys size}
-print pwr:%0pwr[1]% pm:%0pm%+%0pmy%<%0pmt% lky:%lky% [%lkys[1]% %lkys[2]% %lkys[3]% %lkys[4]% %lkys[5]%] <%0lkyON% >%0lkyOFF%
+print pwr:%0pwr[1]% pm:%0pm%+%0pmy%<%0pmt% au:%0au% lky:%lky% <%0lkyON% >%0lkyOFF% (%0cnt%)
 
 ; if force hour passed and pump mins today+yesterday not reached, force ON
 if (hours>fh and pm+pmy<pmt)
@@ -165,45 +161,36 @@ if (hours>fh and pm+pmy<pmt)
  break
 }
 
-; block to set pump ON
-if (pwr[1]==0 and pm<pmt)
-{
- ;get max. ignore zero values
- lky=-99999
- for i 1 lkys[-1] 1
-  if (lkys[i]!=0 and lkys[i]>lky)
-  {
-   lky=lkys[i]
-  }
- next
- print max:%lky%
-
- if lky<lkyON {
-  =#setPump(1)
+;lkyON=-xxx lkyOFF=xx
+; cnt is a counter. if >0 nb of times lky recorded >lkyOFF. similar if <0
+if lky<lkyON {
+ if cnt>0 {
+  cnt=0
  }
+ cnt-=1
 
-; block to set pump OFF
 } else {
-if pwr[1]==1
-{
- if pm>pmt {
-  =#setPump(0)
-
- } else {
-  ;get min
-  lky=99999
-  for i 1 lkys[-1] 1
-   if (lkys[i]!=0 and lkys[i]<lky)
-   {
-    lky=lkys[i]
-   }
-  next
-  print min:%lky%
-
-  if lky>lkyOFF {
-   =#setPump(0)
-  }
+if lky>lkyOFF {
+ if cnt<0 {
+  cnt=0
  }
+ cnt+=1
+
+} else {
+ cnt=0
+}
+}
+
+if (pwr[1]==0 and pm<pmt and cnt<=-5)
+{
+ =#setPump(1)
+
+} else {
+if (pwr[1]==1 and (pm>pmt or cnt>=5))
+{
+ =#setPump(0)
+ ; save permanent vars as we finished a pump cycle. should not happen too frequently.
+ svars
 }
 }
 
@@ -255,10 +242,6 @@ lky=p0
 print Set pump %0i%. Wait %0wait%s
 =>Power %0i%
 tmr=wait
-; save permanent vars if off as we finished a pump cycle
-if i==0 {
- svars
-}
 
 #setPmt
 pmt=mo[month]*60

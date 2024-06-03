@@ -115,6 +115,7 @@ if (hours==0 and preh==23)
  ;save minutes into yesterday. reset today minutes
  pmy=pm
  pm=0
+ svars
  =#setPmt
 }
 preh=hours
@@ -122,6 +123,10 @@ preh=hours
 ; increment mins if power on
 if pwr[1]==1 {
  pm+=1
+ ; save permanent vars if in pump cycle. every hour otherwise we may break the flash mem
+ if upsecs%3600==0 {
+  svars
+ }
 }
 
 } else {
@@ -181,8 +186,7 @@ if (pwr[1]==0 and pm<pmt)
 } else {
 if pwr[1]==1
 {
- if (pm>pmt)
- {
+ if pm>pmt {
   =#setPump(0)
 
  } else {
@@ -251,6 +255,10 @@ lky=p0
 print Set pump %0i%. Wait %0wait%s
 =>Power %0i%
 tmr=wait
+; save permanent vars if off as we finished a pump cycle
+if i==0 {
+ svars
+}
 
 #setPmt
 pmt=mo[month]*60

@@ -1,3 +1,0 @@
-s/__SHELLY_IP__/192.168.1.X/
-s|__GRAFANA_URL__|http://www.example.com/write?db=MYDB&precision=s|
-s/__XKEY__/abcd/

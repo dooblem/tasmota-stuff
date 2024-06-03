@@ -1,3 +1,6 @@
 /archive/
-sed.cnf
-test.scr
+/bak/
+/curl/*.args
+/remote.scr
+/tmp.scr
+/test.scr

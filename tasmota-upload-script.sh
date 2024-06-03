@@ -5,17 +5,19 @@ slimit=2560
 
 script="$1"
 ip="$2"
+action="$3"
 
-[ "$script" = "" -o "$ip" = "" ] && echo "Syntax $0 scriptFile tasmotaIp" && exit 1
+[ "$script" = "" -o "$ip" = "" -o \( "$action" != "" -a "$action" != get \) ] && echo "Syntax $0 scriptFile tasmotaIp|gen [get]" && exit 1
 
 cd "$(dirname $0)"
 
 # comments to remove: line start, spaces, ';', but no 'k' otherwise we keep the comment
 #grep -v '^ *;[^k]' "$script" >/tmp/$0.tmp
-grep -v -e '^ *;' -e '^ *$' "$script" >tmp.scr
+#grep -v -e '^ *;' -e '^ *$' "$script" >tmp.scr
 #sed -i '/^ *;k/s/;k;/;/' /tmp/$0.tmp
+cp "$script" tmp.scr
 
-sedFile=sed.cnf
+sedFile="$script.sed"
 if [ -f "$sedFile" ]; then
 	while IFS= read -r line
 	do
@@ -28,13 +30,25 @@ if [ "$size" -gt "$slimit" ]; then
 	echo "script too big: $size > $slimit" && exit 2
 fi
 
-echo=""
-if [ "$ip" = "test" ]; then
-	echo="echo"
-	cat tmp.scr
+echo "size: $size <= $slimit"
+
+[ "$ip" = "gen" ] && exit
+
+curlArgs=
+if [ -f "curl/$ip.args" ]; then
+	curlArgs=$(cat "curl/$ip.args")
 fi
 
-# --trace-ascii -
-$echo curl -v -F c1=on -F t1="<tmp.scr" -F save= "$ip/ta"
+# get the remote script
+curl -sSf $curlArgs "$ip/s10" | sed -e 's/^.*<textarea[^>]*>//' -e 's|</textarea><script.*$||' >remote.scr
 
-echo "size: $size <= $slimit"
+if diff -u remote.scr tmp.scr; then
+  echo "remote and generated scripts are identical"
+fi
+
+[ "$action" = get ] && exit
+
+read -p "Upload script ??? Enter to continue. Ctrl+C to abort."
+
+# --trace-ascii -
+echo curl -v -F c1=on -F t1="<tmp.scr" -F save= $curlArgs "$ip/ta"

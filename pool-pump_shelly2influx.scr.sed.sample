@@ -1,5 +1,9 @@
 s/__SHELLY_IP__/192.168.1.X/
 s|__GRAFANA_URL__|http://influxdb.example.com/write?db=mydb\&precision=s|
 s/__XKEY__/ApiKeyHere/
-/^ *;/d
+# remove comments except ;k comments
+/^ *;[^k]/d
+# replace ;k; with ; in ;k comments
+/^ *;k/s/;k;/;/
+# remove empty lines
 /^ *$/d

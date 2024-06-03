@@ -11,18 +11,14 @@ action="$3"
 
 cd "$(dirname $0)"
 
-# comments to remove: line start, spaces, ';', but no 'k' otherwise we keep the comment
-#grep -v '^ *;[^k]' "$script" >/tmp/$0.tmp
-#grep -v -e '^ *;' -e '^ *$' "$script" >tmp.scr
-#sed -i '/^ *;k/s/;k;/;/' /tmp/$0.tmp
 cp "$script" tmp.scr
 
 sedFile="$script.sed"
 if [ -f "$sedFile" ]; then
-	while IFS= read -r line
+	grep -v -e '^#' -e '^ *$' "$sedFile" | while IFS= read -r line
 	do
 		sed -i "$line" tmp.scr
-	done < "$sedFile"
+	done
 fi
 
 size=$(stat -c '%s' tmp.scr)

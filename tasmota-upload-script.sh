@@ -47,4 +47,4 @@ fi
 read -p "Upload script ??? Enter to continue. Ctrl+C to abort."
 
 # --trace-ascii -
-echo curl -v -F c1=on -F t1="<tmp.scr" -F save= $curlArgs "$ip/ta"
+curl -v -F c1=on -F t1="<tmp.scr" -F save= $curlArgs "$ip/ta"

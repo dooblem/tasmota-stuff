@@ -1,4 +1,10 @@
 >D 40
+; customizing commands:
+; WebButton1 ON/OFF
+; Template {"NAME":"Gestion Solaire Moteur Piscine","GPIO":[0,0,0,32,2720,2656,0,0,2624,320,224,0,544,1],"FLAG":0,"BASE":18}
+;LedPower
+; in configuration, set gpio16 to LedLink
+; set gpio13 (LedLink) to Led_i
 
 ;k;;; VALEURS A MODIFIER CI-DESSOUS
 
@@ -86,12 +92,13 @@ mo[11]=2
 mo[12]=1
 
 >W
+;%=#wsub
 bu(au "AUTO" "Manuel")
 
-Pompe Today : %0pm% mn
-Pompe Yesterday : %0pmy% mn
-Max jour : %0pmt% mn
-Force apres %0fh%h00 si %0pm%+%0pmy%<%0pmt%
+Max jour{m}%0pmt% mn
+Pompe Today{m}%0pm% mn
+Pompe Yesterday{m}%0pmy% mn
+Force apres %0fh%h00 si{m}%0pm%+%0pmy%<%0pmt%
 
 ;;;;;;;;;;;;;;;;;;;;;;;;
 >S
@@ -106,6 +113,7 @@ e6=1
 ; not working in >B because month is not set yet
 if pmt==0 {
  =#setPmt
+ ->LedPower %au%
 }
 
 ; at midnight
@@ -200,9 +208,6 @@ if (pwr[1]==1 and (pm>pmt or cnt>=5))
 ; end if 30s
 }
 
-;LedPower
-; in configuration, set gpio16 to LedLink
-; set gpio13 (LedLink) to Led_i
 ;;;;;;;;;;;;;;;;;;;;;;;;
 >E
 ; be sure the event is our http req
@@ -210,11 +215,7 @@ if http==1 {
  http=0
 } else {
  ; mode change
- if au==1 {
-  ->LedPower 1
- } else {
-  ->LedPower 0
- }
+ ->LedPower %au%
  break
 }
 
@@ -246,3 +247,12 @@ tmr=wait
 #setPmt
 pmt=mo[month]*60
 print Pump minutes target today: %0pmt%
+
+;#wsub
+;wcs <center><h1>
+;if au==1 {
+;wcs AUTO
+;} else {
+;wcs Manual
+;}
+;wcs </h1></center>

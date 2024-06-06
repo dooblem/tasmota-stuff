@@ -162,20 +162,8 @@ if (tmr!=0 or time<sunrise or time>sunset or pwr[2]==0)
  break
 }
 
-print pwr:%0pwr[1]% au:%0pwr[2]% pm:%0pm%+%0pmy%<%0pmt% lky:%lky% <%0lkyON% >%0lkyOFF% (%0cnt%)
-
-; if force hour passed and pump mins today+yesterday not reached, force ON
-if (hours>fh and pm+pmy<pmt)
-{
- if pwr[1]==0 {
-  print Force pump ON
-  =#setPump(1)
- }
- break
-}
-
 ;lkyON=-xxx lkyOFF=xx
-; cnt is a counter. if >0 nb of times lky recorded >lkyOFF. similar if <0
+; compute cnt. cnt is a counter. if >0 nb of times lky recorded >lkyOFF. similar if <0
 if lky<lkyON {
  if cnt>0 {
   cnt=0
@@ -192,6 +180,18 @@ if lky>lkyOFF {
 } else {
  cnt=0
 }
+}
+
+print pwr:%0pwr[1]% au:%0pwr[2]% pm:%0pm%+%0pmy%<%0pmt% lky:%lky% <%0lkyON% >%0lkyOFF% (%0cnt%)
+
+; if force hour passed and pump mins today+yesterday not reached, force ON
+if (hours>fh and pm+pmy<pmt)
+{
+ if pwr[1]==0 {
+  print Force pump ON
+  =#setPump(1)
+ }
+ break
 }
 
 if (pwr[1]==0 and pm<pmt and cnt<=-5)

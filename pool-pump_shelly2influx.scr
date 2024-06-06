@@ -1,10 +1,18 @@
 >D 40
 ; customizing commands:
 ; WebButton1 ON/OFF
-; Template {"NAME":"Gestion Solaire Moteur Piscine","GPIO":[0,0,0,32,2720,2656,0,0,2624,320,224,0,544,1],"FLAG":0,"BASE":18}
-;LedPower
-; in configuration, set gpio16 to LedLink
-; set gpio13 (LedLink) to Led_i
+
+; declare a dummy additionnal relay, and link it to the free blue led
+; https://templates.blakadder.com/athom_PG01EU16A.html
+; Template {"NAME":"Gestion Solaire Moteur Piscine","GPIO":[0,0,320,32,2720,2656,0,0,2624,321,224,225,544,1],"FLAG":0,"BASE":18}
+;
+; Red led is hard locked to relay 1, Blue led is free (defaults to LedLink)
+; gpio16: None    to LedLink - to disable link status
+; gpio15: None    to Relay 2 - dummy relay to control auto mode
+; gpio13: LedLink to Led_i 2 - dummy relay will control the led
+; gpio2:  None    to Led_i 1 - otherwise ledi2 not working. so assigned to a free gpio
+;
+; LedState 1 (reset this to default if needed)
 
 ;k;;; VALEURS A MODIFIER CI-DESSOUS
 
@@ -73,9 +81,6 @@ p1=""
 t1=""
 tr1=""
 
-; mode auto ?
-au=1
-
 ;;;;;;;;;;;;;;;;;;;;;;;; on script start
 >B
 mo[1]=1
@@ -93,7 +98,6 @@ mo[12]=1
 
 >W
 ;%=#wsub
-bu(au "AUTO" "Manuel")
 
 Max jour{m}%0pmt% mn
 Pompe Today{m}%0pm% mn
@@ -113,7 +117,6 @@ e6=1
 ; not working in >B because month is not set yet
 if pmt==0 {
  =#setPmt
- ->LedPower %au%
 }
 
 ; at midnight
@@ -151,13 +154,13 @@ http=0
 ; every 60s: pump management
 if e6==1 {
 
-; pump management when timer ok, and sun hours
-if (tmr!=0 or time<sunrise or time>sunset or au==0)
+; pump management when timer ok, and sun hours, and mode auto
+if (tmr!=0 or time<sunrise or time>sunset or pwr[2]==0)
 {
  break
 }
 
-print pwr:%0pwr[1]% pm:%0pm%+%0pmy%<%0pmt% au:%0au% lky:%lky% <%0lkyON% >%0lkyOFF% (%0cnt%)
+print pwr:%0pwr[1]% au:%0pwr[2]% pm:%0pm%+%0pmy%<%0pmt% lky:%lky% <%0lkyON% >%0lkyOFF% (%0cnt%)
 
 ; if force hour passed and pump mins today+yesterday not reached, force ON
 if (hours>fh and pm+pmy<pmt)
@@ -214,8 +217,6 @@ if (pwr[1]==1 and (pm>pmt or cnt>=5))
 if http==1 {
  http=0
 } else {
- ; mode change
- ->LedPower %au%
  break
 }
 

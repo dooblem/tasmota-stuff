@@ -1,8 +1,10 @@
 >D 40
 ; customizing commands:
-; WebButton1 ON/OFF
+; WebButton1 on/off Relai
+; WebButton2 on/off Relai Auto
 
 ; declare a dummy additionnal relay, and link it to the free blue led
+;   double press will also work to toggle Auto mode !
 ; https://templates.blakadder.com/athom_PG01EU16A.html
 ; Template {"NAME":"Gestion Solaire Moteur Piscine","GPIO":[0,0,320,32,2720,2656,0,0,2624,321,224,225,544,1],"FLAG":0,"BASE":18}
 ;

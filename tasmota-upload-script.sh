@@ -13,13 +13,17 @@ cd "$(dirname $0)"
 
 cp "$script" tmp.scr
 
-sedFile="$script.sed"
-if [ -f "$sedFile" ]; then
-	grep -v -e '^#' -e '^ *$' "$sedFile" | while IFS= read -r line
-	do
-		sed -i "$line" tmp.scr
-	done
-fi
+applySedFile() {
+  if [ -f "$1" ]; then
+    grep -v -e '^#' -e '^ *$' "$1" | while IFS= read -r line
+    do
+      sed -i "$line" tmp.scr
+    done
+  fi
+}
+
+applySedFile "hosts/$ip.sed"
+applySedFile "$script.sed"
 
 size=$(stat -c '%s' tmp.scr)
 if [ "$size" -gt "$slimit" ]; then
@@ -31,8 +35,8 @@ echo "size: $size <= $slimit"
 [ "$ip" = "gen" ] && exit
 
 curlArgs=
-if [ -f "curl/$ip.args" ]; then
-	curlArgs=$(cat "curl/$ip.args")
+if [ -f "hosts/$ip.curlargs" ]; then
+	curlArgs=$(cat "hosts/$ip.curlargs")
 fi
 
 # get the remote script

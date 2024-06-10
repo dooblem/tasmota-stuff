@@ -14,7 +14,8 @@
 ; gpio13: LedLink to Led_i 2 - dummy relay will control the led
 ; gpio2:  None    to Led_i 1 - otherwise ledi2 not working. so assigned to a free gpio
 ;
-; LedState 1 (reset this to default if needed)
+; LedState 1 (to reset this to default if needed)
+; SetOption63 1 (Disable power state scanning at restart. otherwise relay2 state is not kept)
 
 ;k;;; VALEURS A MODIFIER CI-DESSOUS
 
@@ -207,6 +208,9 @@ if (pwr[1]==1 and (pm>pmt or cnt>=5))
 }
 }
 
+; report pool pump data
+->WebQuery __GRAFANA_URL__ POST [X-Key:__XKEY__]poolpump power=%1enrg[7]%,total=%5enrg[0]%
+
 ; end if e6 60s
 }
 
@@ -235,7 +239,7 @@ tr1=st(tr1 '}' 1)
 print shellyem 0.power=%p0% 0.total=%t0% 0.total_returned=%tr0% 1.power=%p1% 1.total=%t1% 1.total_returned=%tr1%
 
 ; {influxdb info: fill in bellow}
-->WebQuery __GRAFANA_URL__ POST [X-Key:__XKEY__]shellyem 0.power=%p0%,0.total=%t0%,0.total_returned=%tr0%,1.power=%p1%,1.total=%t1%,1.total_returned=%tr1%\npoolpump power=%1enrg[7]%,total=%5enrg[0]%
+->WebQuery __GRAFANA_URL__ POST [X-Key:__XKEY__]shellyem 0.power=%p0%,0.total=%t0%,0.total_returned=%tr0%,1.power=%p1%,1.total=%t1%,1.total_returned=%tr1%
 
 ; {lky: p0 if linky value is on the 1st clamp, p1 if on 2nd clamp}
 lky=p0

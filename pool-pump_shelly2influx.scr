@@ -34,8 +34,8 @@ lkyOFF=50
 fh=11
 
 ; seconds to wait after ON/OFF
-;k; temps min attente entre chaque ON/OFF
-wait=300
+;k; temps en sec attente entre chaque ON/OFF
+wait=90
 
 ;k; temps pompe par mois: voir lignes mo[ plus bas dans le program
 

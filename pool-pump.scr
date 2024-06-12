@@ -1,24 +1,57 @@
 >D
+; declare a dummy additionnal relay, and link it to the free blue led
+;   double press will also work to toggle Auto mode !
+; https://templates.blakadder.com/athom_PG01EU16A.html
+; Template {"NAME":"Gestion Solaire Moteur Piscine","GPIO":[0,0,320,32,2720,2656,0,0,2624,321,224,225,544,1],"FLAG":0,"BASE":18}
+;
+; Red led is hard locked to relay 1, Blue led is free (defaults to LedLink)
+; gpio16: None    to LedLink - to disable link status
+; gpio15: None    to Relay 2 - dummy relay to control auto mode
+; gpio13: LedLink to Led_i 2 - dummy relay will control the led
+; gpio2:  None    to Led_i 1 - otherwise ledi2 not working. so assigned to a free gpio
+;
+; customizing commands:
+; Power2 on
+; WebButton1 on/off Relay
+; WebButton2 on/off Relay Auto
+; LedState 1 (to reset this to default if needed)
+; SetOption63 1 (Disable power state scanning at restart. otherwise relay2 state is not kept)
 
-; table of linky records: 7 minutes. you should update {print lkys list} bellow as well.
-m:lkys=0 7
+;k;;; VALUES TO CONFIGURE
 
-; linky limit value to turn ON
+;k; Shelly IP addr
+ip="__SHELLY_IP__"
+
+; sensible values for a 300w pump: -250 100
+;k; power to set ON
 lkyON=-250
-; linky limit value to turn OFF
+;k; power to set OFF
 lkyOFF=100
 
-; seconds to wait after ON/OFF
-wait=600
+;k; hour after which pump is forced
+; set high to disable
+;fh=11
+fh=99
+
+;k; secs to wait after ON/OFF
+wait=300
+
+;k; pump daily time by month: change mo[ lines bellow
+
+;k;;; END OF VALUES TO CONFIGURE
 
 ; Other info to fill bellow:
 ; {influxdb info}
-; {lky}
+; {shelly clamp}
 
 ;;;;;;;;;
 
-;pump minutes (permanent var?)
-pm=0
+; permanent vars. keep the order!
+;pump minutes today
+p:pm=0
+;pm yesterday
+p:pmy=0
+
 ;pm daily target (max)
 pmt=0
 ;pump target by month
@@ -32,11 +65,15 @@ t:tmr=0
 ; previous hour
 preh=0
 
-;parameter or index
+;counter to be sure we are bellow lkyON, or above lkyOFF (see bellow)
+cnt=0
+
+;parameter
 i=0
 
-; the cumulus is OK. other loads can use energy. ie pool pump
-g:cuOk=0
+; network global var. set by other tasmota relai4.scr. the cumulus is OK. other loads can use energy. ie pool pump
+; you may want to set it to zero by default if you want the script to wait for the signal
+g:cuOk=1
 
 ;;;;;;;;;;;;;;;;;;;;;;;;
 >G
@@ -56,95 +93,79 @@ mo[9]=8
 mo[10]=6
 mo[11]=2
 mo[12]=1
-=#setPmt
 
-;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;; web info
+>W
+
+;Max jour{m}%0pmt% mn
+;Pompe Today{m}%0pm% mn
+;Pompe Yesterday{m}%0pmy% mn
+;Force apres %0fh%h00 si{m}%0pm%+%0pmy%<%0pmt%
+
+Target today{m}%0pmt% mn
+Pump Today{m}%0pm% mn
+Pump Yesterday{m}%0pmy% mn
+Force after %0fh%h00 if{m}%0pm%+%0pmy%<%0pmt%
+
+;;;;;;;;;;;;;;;;;;;;;;;; every sec
 >S
 
-; every 60s: new day...
+; every 60s
 if upsecs%60!=0 {
  break
 }
 
+; initialize pm target. will run once at boot
+; not working in >B because month is not set yet
+if pmt==0 {
+ =#setPmt
+}
+
+; at midnight
 if (hours==0 and preh==23)
 {
  print New day
+ ;save minutes into yesterday. reset today minutes
+ pmy=pm
  pm=0
+ svars
  =#setPmt
- ; reset cuOk (though it's the responsibility of the tasmota cumulus)
- cuOk=0
 }
 preh=hours
 
 ; increment mins if power on
 if pwr[1]==1 {
  pm+=1
+ ; save permanent vars if in pump cycle. every hour otherwise we may break the flash mem
+ if upsecs%3600==0 {
+  svars
+ }
 }
 
-lky=0
-; only get metrics and operate during sun hours
-; in non sun hours we will insert zeros
-if (time>sunrise and time<sunset)
-{
- http=1
- http("__SHELLY_IP__" "/emeter/0")
- http=0
-}
-; insert into array even at night
-lkys=lky
-
-; pump management when timer ok, and sun hours
-if (tmr!=0 or time<sunrise or time>sunset)
+; pump management when timer ok, and sun hours, and mode auto
+if (tmr!=0 or time<sunrise or time>sunset or pwr[2]==0)
 {
  break
 }
 
-; {print lkys list: update to match lkys size}
-print pwr:%0pwr[1]% cuOk:%0cuOk% pm:%0pm%<%0pmt% lky:%lky% [%lkys[1]% %lkys[2]% %lkys[3]% %lkys[4]% %lkys[5]% %lkys[6]% %lkys[7]%] <%0lkyON% >%0lkyOFF%
-
-; block to set pump ON
-if (pwr[1]==0 and cuOk==1 and pm<pmt)
+; if force hour passed and pump mins today+yesterday not reached, force ON
+if (hours>fh and pm+pmy<pmt)
 {
- ;get max. ignore zero values
- lky=-99999
- for i 1 lkys[-1] 1
-  if (lkys[i]!=0 and lkys[i]>lky)
-  {
-   lky=lkys[i]
-  }
- next
- print max:%lky%
-
- if lky<lkyON {
+ if pwr[1]==0 {
+  print Force pump ON
   =#setPump(1)
  }
-
-; block to set pump OFF
-} else {
-if pwr[1]==1
-{
- if (cuOk==0 or pm>pmt)
- {
-  =#setPump(0)
-
- } else {
-  ;get min
-  lky=99999
-  for i 1 lkys[-1] 1
-   if (lkys[i]!=0 and lkys[i]<lky)
-   {
-    lky=lkys[i]
-   }
-  next
-  print min:%lky%
-
-  if lky>lkyOFF {
-   =#setPump(0)
-  }
- }
+ break
 }
 
-;;;;;;;;;;;;;;;;;;;;;;;;
+; get shelly power value
+; set to /emeter/1 if on 2nd {shelly clamp}
+lky=0
+http=1
+http("__SHELLY_IP__" "/emeter/0")
+http=0
+
+;;;;;;;;;;;;;;;;;;;;;;;; events
 >E
 ; be sure the event is our http req
 if http==1 {
@@ -155,7 +176,45 @@ if http==1 {
 
 lky=gwr("\"power\":" 2 ,)
 
-;;;;;;;;;;;;;;;;;;;;;;;;
+;lkyON=-xxx lkyOFF=xx
+; compute cnt. cnt is a counter. if >0 nb of times lky recorded >lkyOFF. similar if <0
+if lky<lkyON {
+ if cnt>0 {
+  cnt=0
+ }
+ cnt-=1
+
+} else {
+if lky>lkyOFF {
+ if cnt<0 {
+  cnt=0
+ }
+ cnt+=1
+
+} else {
+ cnt=0
+}
+}
+
+print pwr:%0pwr[1]% pm:%0pm%+%0pmy%<%0pmt% lky:%lky% <%0lkyON% >%0lkyOFF% (%0cnt%)
+
+if (pwr[1]==0 and pm<pmt and cnt<=-5 and cuOk==1)
+{
+ =#setPump(1)
+
+} else {
+if (pwr[1]==1 and (pm>pmt or cnt>=5 or cuOk==0))
+{
+ =#setPump(0)
+ ; save permanent vars as we finished a pump cycle. should not happen too frequently.
+ svars
+}
+}
+
+; report pool pump data to influxdb
+;->WebQuery __GRAFANA_URL__ POST [X-Key:__XKEY__]poolpump power=%1enrg[7]%,total=%5enrg[0]%
+
+;;;;;;;;;;;;;;;;;;;;;;;; subroutines
 #setPump(i)
 print Set pump %0i%. Wait %0wait%s
 =>Power %0i%

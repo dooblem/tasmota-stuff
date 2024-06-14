@@ -56,6 +56,8 @@ e6=0
 p:pm=0
 ;pm yesterday
 p:pmy=0
+;pm date
+pmd="?"
 
 ;pm daily target (max)
 pmt=0
@@ -103,7 +105,7 @@ mo[12]=1
 ;%=#wsub
 
 Max jour{m}%0pmt% mn
-Pompe Today{m}%0pm% mn
+Pompe Today (%pmd%){m}%0pm% mn
 Pompe Yesterday{m}%0pmy% mn
 Force apres %0fh%h00 si{m}%0pm%+%0pmy%<%0pmt%
 
@@ -129,6 +131,7 @@ if (hours==0 and preh==23)
  ;save minutes into yesterday. reset today minutes
  pmy=pm
  pm=0
+ pmd=s(0day)+"/"+s(0month)
  svars
  =#setPmt
 }

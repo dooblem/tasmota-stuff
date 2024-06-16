@@ -2,7 +2,7 @@
 
 ## Screenshot
 
-<img src="/img/tasmota_pool-pump.png" width="50%" alt="Pool Pump Sun Manager witch Tasmota - Screenshot" />
+<img src="/img/tasmota_pool-pump.png" width="40%" alt="Pool Pump Sun Manager witch Tasmota - Screenshot" />
 
 ## Features
 
@@ -18,4 +18,4 @@
 
 ## Setup
 
-Follow the [main README](../README.md) to flash Tasmota and upload the `pool-pump.scr` script.
+Follow the [main README](../) to flash Tasmota and upload the `pool-pump.scr` script.

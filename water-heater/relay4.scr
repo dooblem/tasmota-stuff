@@ -1,5 +1,4 @@
 >D
-
 ; PowerOnState 1
 ; SetOption0 0 - do not save power state (avoids too many writes on flash)
 

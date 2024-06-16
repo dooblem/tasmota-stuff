@@ -3,10 +3,10 @@ Tasmota scripts for various applications.
 In this repo:
 * `.vimrc`: a simple vimrc config to force syntax to lisp for tasmota scripts
 * `tasmota-scr.sh`: a shell script to upload directly a script to a module (because coding is a pain with default web ui)
-* shelly2influx/ directory: a script to get power data from shelly EM and upload it to an influxdb server
-* pool-pump/ directory: a script to manage a pool-pump reading info from a shelly EM 
-* water-heater/ directory: a simple solar inverter script for a 4 channel relay
-* other/ directory: bash/python versions of the Tasmota scripts to manage pool pump and water heater
+* `shelly2influx/` directory: a script to get power data from shelly EM and upload it to an influxdb server
+* `pool-pump/` directory: a script to manage a pool-pump reading info from a shelly EM 
+* `water-heater/` directory: a simple solar inverter script for a 4 channel relay
+* `other/` directory: bash/python versions of the Tasmota scripts to manage pool pump and water heater
 
 ## Get a Tasmota device
 
@@ -26,7 +26,7 @@ If you trust me you can download and use the Tasmota binary I compiled and that 
 
 See bellow if you want to compile Tasmota yourself.
 
-1. get the `tasmota-scripting.bin.gz` and `tasmota-minimal.bin.gz` files from [releases](/dooblem/tasmota-stuff/releases).
+1. get the `tasmota-scripting.bin.gz` and `tasmota-minimal.bin.gz` files from [releases](https://github.com/dooblem/tasmota-stuff/releases).
 
 2. flash the `tasmota-scripting.bin.gz` file using Tasmota web interface. You will probably need to flash the `tasmota-minimal.bin.gz` file first, then flash the scripting version.
 

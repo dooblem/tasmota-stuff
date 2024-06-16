@@ -54,6 +54,8 @@ wait=300
 p:pm=0
 ;pm yesterday
 p:pmy=0
+;pm date
+pmd="?"
 
 ;pm daily target (max)
 pmt=0
@@ -131,6 +133,7 @@ if (hours==0 and preh==23)
  ;save minutes into yesterday. reset today minutes
  pmy=pm
  pm=0
+ pmd=s(0day)+"/"+s(0month)
  svars
  =#setPmt
 }

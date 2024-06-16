@@ -1,8 +1,4 @@
 >D 40
-; customizing commands:
-; WebButton1 on/off Relai
-; WebButton2 on/off Relai Auto
-
 ; declare a dummy additionnal relay, and link it to the free blue led
 ;   double press will also work to toggle Auto mode !
 ; https://templates.blakadder.com/athom_PG01EU16A.html
@@ -14,27 +10,32 @@
 ; gpio13: LedLink to Led_i 2 - dummy relay will control the led
 ; gpio2:  None    to Led_i 1 - otherwise ledi2 not working. so assigned to a free gpio
 ;
+; other free gpio: None    to Relay 3 - dummy relay to control Always on mode
+;
+; customizing commands:
+; Power2 on
+; WebButton1 ON/OFF Pool Pump
+; WebButton2 ON/OFF Sun Mode (Limited)
+; WebButton3 ON/OFF Sun Unlimited
 ; LedState 1 (to reset this to default if needed)
 ; SetOption63 1 (Disable power state scanning at restart. otherwise relay2 state is not kept)
 
 ;k;;; VALEURS A MODIFIER CI-DESSOUS
 
-;shelly ip address
 ;k; Adresse ip du shelly
 ip="__SHELLY_IP__"
 
-; linky limit value to turn ON
+; sensible values for a 300w pump: -250 100
 ;k; puissance linky ON
 lkyON=-700
-; linky limit value to turn OFF
 ;k; puissance linky OFF
 lkyOFF=50
 
-; force hour
 ;k; heure a laquelle on force la pompe
+; set high to disable
+;fh=11
 fh=11
 
-; seconds to wait after ON/OFF
 ;k; temps en sec attente entre chaque ON/OFF
 wait=90
 
@@ -51,8 +52,8 @@ wait=90
 ; true if every 60s
 e6=0
 
-; perm vars keep the order !
-;pump minutes
+; permanent vars. keep the order!
+;pump minutes today
 p:pm=0
 ;pm yesterday
 p:pmy=0
@@ -86,6 +87,14 @@ p1=""
 t1=""
 tr1=""
 
+; network global var. set by other tasmota relai4.scr. the cumulus is OK. other loads can use energy. ie pool pump
+; you may want to set it to zero by default if you want the script to wait for the signal
+;g:cuOk=1
+
+;;;;;;;;;;;;;;;;;;;;;;;;
+;>G
+;print Received cuOk=%cuOk%
+
 ;;;;;;;;;;;;;;;;;;;;;;;; on script start
 >B
 mo[1]=1
@@ -101,15 +110,20 @@ mo[10]=6
 mo[11]=2
 mo[12]=1
 
+;;;;;;;;;;;;;;;;;; web info
 >W
-;%=#wsub
 
 Max jour{m}%0pmt% mn
 Pompe Today (%pmd%){m}%0pm% mn
 Pompe Yesterday{m}%0pmy% mn
 Force apres %0fh%h00 si{m}%0pm%+%0pmy%<%0pmt%
 
-;;;;;;;;;;;;;;;;;;;;;;;;
+;Target today{m}%0pmt% mn
+;Pump Today (%pmd%){m}%0pm% mn
+;Pump Yesterday{m}%0pmy% mn
+;Force after %0fh%h00 if{m}%0pm%+%0pmy%<%0pmt%
+
+;;;;;;;;;;;;;;;;;;;;;;;; every sec
 >S
 
 ; every 30s: get shelly values
@@ -166,6 +180,16 @@ if (tmr!=0 or time<sunrise or time>sunset or pwr[2]==0)
  break
 }
 
+; if force hour passed and pump mins today+yesterday not reached, force ON
+if (hours>fh and pm+pmy<pmt)
+{
+ if pwr[1]==0 {
+  print Force pump ON
+  =#setPump(1)
+ }
+ break
+}
+
 ;lkyON=-xxx lkyOFF=xx
 ; compute cnt. cnt is a counter. if >0 nb of times lky recorded >lkyOFF. similar if <0
 if lky<lkyON {
@@ -187,16 +211,6 @@ if lky>lkyOFF {
 }
 
 print pwr:%0pwr[1]% au:%0pwr[2]% pm:%0pm%+%0pmy%<%0pmt% lky:%lky% <%0lkyON% >%0lkyOFF% (%0cnt%)
-
-; if force hour passed and pump mins today+yesterday not reached, force ON
-if (hours>fh and pm+pmy<pmt)
-{
- if pwr[1]==0 {
-  print Force pump ON
-  =#setPump(1)
- }
- break
-}
 
 if (pwr[1]==0 and pm<pmt and cnt<=-5)
 {
@@ -248,7 +262,7 @@ print shellyem 0.power=%p0% 0.total=%t0% 0.total_returned=%tr0% 1.power=%p1% 1.t
 lky=p0
 ;lky=gwr("\"power\":" 2 ,)
 
-;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;; subroutines
 #setPump(i)
 print Set pump %0i%. Wait %0wait%s
 =>Power %0i%
@@ -257,12 +271,3 @@ tmr=wait
 #setPmt
 pmt=mo[month]*60
 print Pump minutes target today: %0pmt%
-
-;#wsub
-;wcs <center><h1>
-;if au==1 {
-;wcs AUTO
-;} else {
-;wcs Manual
-;}
-;wcs </h1></center>

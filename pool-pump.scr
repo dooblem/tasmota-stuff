@@ -103,12 +103,12 @@ mo[12]=1
 >W
 
 ;Max jour{m}%0pmt% mn
-;Pompe Today{m}%0pm% mn
+;Pompe Today (%pmd%){m}%0pm% mn
 ;Pompe Yesterday{m}%0pmy% mn
 ;Force apres %0fh%h00 si{m}%0pm%+%0pmy%<%0pmt%
 
 Target today{m}%0pmt% mn
-Pump Today{m}%0pm% mn
+Pump Today (%pmd%){m}%0pm% mn
 Pump Yesterday{m}%0pmy% mn
 Force after %0fh%h00 if{m}%0pm%+%0pmy%<%0pmt%
 

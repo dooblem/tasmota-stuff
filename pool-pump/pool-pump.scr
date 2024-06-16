@@ -2,7 +2,7 @@
 ; declare a dummy additionnal relay, and link it to the free blue led
 ;   double press will also work to toggle Auto mode !
 ; https://templates.blakadder.com/athom_PG01EU16A.html
-; Template {"NAME":"Gestion Solaire Moteur Piscine","GPIO":[0,0,320,32,2720,2656,0,0,2624,321,224,225,544,1],"FLAG":0,"BASE":18}
+; Template {"NAME":"Pool Pump Sun Manager","GPIO":[0,0,320,32,2720,2656,0,0,2624,321,224,225,544,1],"FLAG":0,"BASE":18}
 ;
 ; Red led is hard locked to relay 1, Blue led is free (defaults to LedLink)
 ; gpio16: None    to LedLink - to disable link status
@@ -14,9 +14,9 @@
 ;
 ; customizing commands:
 ; Power2 on
-; WebButton1 ON/OFF Pool Pump
-; WebButton2 ON/OFF Sun Mode (Limited)
-; WebButton3 ON/OFF Sun Unlimited
+; WebButton1 Pool Pump
+; WebButton2 Sun Auto Mode
+; WebButton3 Sun Unlimited
 ; LedState 1 (to reset this to default if needed)
 ; SetOption63 1 (Disable power state scanning at restart. otherwise relay2 state is not kept)
 
@@ -32,9 +32,8 @@ lkyON=-250
 lkyOFF=100
 
 ;k; hour after which pump is forced
-; set high to disable
-;fh=11
-fh=99
+; set high to disable (fh=99)
+fh=11
 
 ;k; secs to wait after ON/OFF
 wait=300

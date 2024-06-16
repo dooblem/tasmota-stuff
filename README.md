@@ -16,6 +16,16 @@ But they should work on any ESP82xx devices. They should also work on ESP32, tho
 
 I bought my devices on [Athom website](https://www.athom.tech). They come with Tasmota preflashed.
 
+## Get a Shelly EM or other energy meter
+
+Most of the scripts needs a way to monitor the power consumption of the house.
+
+I'm using a [Shelly](https://www.shelly.com) EM (Electric Meter) with 2 power clamps: 1st on house consumption/feed-in, 2nd on solar production.
+
+Not tested, but it's certainly possible to use another energy monitoring device, with slight code changes.
+
+For french users, the [Denky D4 ESP32 TIC Teleinfo Reader](https://www.tindie.com/products/hallard/denky-d4-esp32-tic-teleinfo-reader/) would be a good choice as well!
+
 ## Instructions
 
 Those Tasmota scripts require that you flash your Tasmota device with scripting enabled.
@@ -43,7 +53,7 @@ Just press enter to confirm the upload.
 ```
 You may see a compress error if the script is too big. This is not good: the script will not work correctly, or may be truncated at next restart.
 
-## If want to compile Tasmota yourself
+## If you want to compile Tasmota yourself
 
 Otherwise you must compile Tasmota. The only changes I made are in the `user_config_override.h` file. 
 

@@ -10,10 +10,13 @@
 ; gpio13: LedLink to Led_i 2 - dummy relay will control the led
 ; gpio2:  None    to Led_i 1 - otherwise ledi2 not working. so assigned to a free gpio
 ;
+; other free gpio: None    to Relay 3 - dummy relay to control Always on mode
+;
 ; customizing commands:
 ; Power2 on
-; WebButton1 on/off Relay
-; WebButton2 on/off Relay Auto
+; WebButton1 ON/OFF Pool Pump
+; WebButton2 ON/OFF Sun Mode (Limited)
+; WebButton3 ON/OFF Sun Unlimited
 ; LedState 1 (to reset this to default if needed)
 ; SetOption63 1 (Disable power state scanning at restart. otherwise relay2 state is not kept)
 
@@ -203,7 +206,7 @@ if (pwr[1]==0 and pm<pmt and cnt<=-5 and cuOk==1)
  =#setPump(1)
 
 } else {
-if (pwr[1]==1 and (pm>pmt or cnt>=5 or cuOk==0))
+if (pwr[1]==1 and ((pm>pmt and pwr[3]==0) or cnt>=5 or cuOk==0))
 {
  =#setPump(0)
  ; save permanent vars as we finished a pump cycle. should not happen too frequently.

@@ -44,7 +44,7 @@ Take any free GPIO, and set it from `None` to `Relay` `2`: this will add a toggl
 
 (optional) Take any other free GPIO, and set it from `None` to `Relay` `3`: this will add another button, allowing to control "Sun Unlimited Mode".
 
-Those changes are shown on image bellow:
+Those changes are shown on image bellow:  
 <img src="/img/gpio_changes_relay.png" width="40%" alt="Tasmota Template Gpio changes - relays " />
 
 Note: feel free to change the name of your device as well. Like "Pool Pump Sun Manager". It's displayed as main title of the Web UI.
@@ -174,7 +174,7 @@ Additionnaly, you must:
 * assign `LedLink` to any other free GPIO, in order to ignore any link status (as explained in Tasmota doc)
 * assign `Led_i` `1` to any other free GPIO, in order to ignore relay 1 power led. Anyway it's already hardwired on the red led. Without that Tasmota will ignore led 2 and it's not working.
 
-Those changes are shown on image bellow:
+Those changes are shown on image bellow:  
 <img src="/img/gpio_changes_led.png" width="40%" alt="Tasmota Template Gpio changes - Leds " />
 
 Notes:

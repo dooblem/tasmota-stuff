@@ -1,0 +1,125 @@
+>D
+;;; VALUES TO CONFIGURE
+; Shelly IP addr
+ip="192.168.1.X"
+; power to set ON
+lkyON=-250
+; power to set OFF
+lkyOFF=100
+; hour after which pump is forced
+fh=11
+; secs to wait after ON/OFF
+wait=300
+; pump daily time by month: change mo[ lines bellow
+;;; END OF VALUES TO CONFIGURE
+p:pm=0
+p:pmy=0
+pmd="?"
+pmt=0
+m:mo=0 12
+lky=0
+http=0
+t:tmr=0
+preh=0
+cnt=0
+i=0
+g:cuOk=1
+>G
+print Received cuOk=%cuOk%
+>B
+mo[1]=1
+mo[2]=1
+mo[3]=2
+mo[4]=3.5
+mo[5]=5
+mo[6]=9
+mo[7]=10
+mo[8]=10
+mo[9]=8
+mo[10]=6
+mo[11]=2
+mo[12]=1
+>W
+Target today{m}%0pmt% mn
+Pump Today (%pmd%){m}%0pm% mn
+Pump Yesterday{m}%0pmy% mn
+Force after %0fh%h00 if{m}%0pm%+%0pmy%<%0pmt%
+>S
+if upsecs%60!=0 {
+ break
+}
+if pmt==0 {
+ =#setPmt
+}
+if (hours==0 and preh==23)
+{
+ print New day
+ pmy=pm
+ pm=0
+ pmd=s(0day)+"/"+s(0month)
+ svars
+ =#setPmt
+}
+preh=hours
+if pwr[1]==1 {
+ pm+=1
+ if upsecs%3600==0 {
+  svars
+ }
+}
+if (tmr!=0 or time<sunrise or time>sunset or pwr[2]==0)
+{
+ break
+}
+if (hours>fh and pm+pmy<pmt)
+{
+ if pwr[1]==0 {
+  print Force pump ON
+  =#setPump(1)
+ }
+ break
+}
+lky=0
+http=1
+http("192.168.1.X" "/emeter/0")
+http=0
+>E
+if http==1 {
+ http=0
+} else {
+ break
+}
+lky=gwr("\"power\":" 2 ,)
+if lky<lkyON {
+ if cnt>0 {
+  cnt=0
+ }
+ cnt-=1
+} else {
+if lky>lkyOFF {
+ if cnt<0 {
+  cnt=0
+ }
+ cnt+=1
+} else {
+ cnt=0
+}
+}
+print pwr:%0pwr[1]% pm:%0pm%+%0pmy%<%0pmt% lky:%lky% <%0lkyON% >%0lkyOFF% (%0cnt%)
+if (pwr[1]==0 and pm<pmt and cnt<=-5 and cuOk==1)
+{
+ =#setPump(1)
+} else {
+if (pwr[1]==1 and ((pm>pmt and pwr[3]==0) or cnt>=5 or cuOk==0))
+{
+ =#setPump(0)
+ svars
+}
+}
+#setPump(i)
+print Set pump %0i%. Wait %0wait%s
+=>Power %0i%
+tmr=wait
+#setPmt
+pmt=mo[month]*60
+print Pump minutes target today: %0pmt%

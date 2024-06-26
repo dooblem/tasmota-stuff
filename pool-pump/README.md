@@ -40,11 +40,12 @@ See the [main README](../)
 
 In Tasmota Web User Interface, go to Configuration > Configure Template.
 
-<img src="/img/gpio_changes_relay.png" width="40%" alt="Tasmota Template Gpio changes - relays " />
-
 Take any free GPIO, and set it from `None` to `Relay` `2`: this will add a toggle button in the main web page, allowing to control "Sun Auto Mode". It can also be toggled with a double click on the physical button.
 
 (optional) Take any other free GPIO, and set it from `None` to `Relay` `3`: this will add another button, allowing to control "Sun Unlimited Mode".
+
+Those changes are shown on image bellow:
+<img src="/img/gpio_changes_relay.png" width="40%" alt="Tasmota Template Gpio changes - relays " />
 
 Note: feel free to change the name of your device as well. Like "Pool Pump Sun Manager". It's displayed as main title of the Web UI.
 
@@ -167,13 +168,14 @@ Note: on devices like the Athom Monitoring Smart Plug, there is 2 leds:
 * a blue led is on a GPIO and configurable: we will use it to show the "Sun Auto Mode" status
 * the led colors blend behind the button: pink means that both leds are ON
 
-<img src="/img/gpio_changes_led.png" width="40%" alt="Tasmota Template Gpio changes - Leds " />
-
 Identify which GPIO is controlling your LED. On Athom Smart Plug it's GPIO13 which is configured as `LedLink` by default. This is your LED. Configure it as `Led_i` `2` so that it will show the status of `Relay` `2` (our "Sun Auto Mode" relay).
 
 Additionnaly, you must:
 * assign `LedLink` to any other free GPIO, in order to ignore any link status (as explained in Tasmota doc)
 * assign `Led_i` `1` to any other free GPIO, in order to ignore relay 1 power led. Anyway it's already hardwired on the red led. Without that Tasmota will ignore led 2 and it's not working.
+
+Those changes are shown on image bellow:
+<img src="/img/gpio_changes_led.png" width="40%" alt="Tasmota Template Gpio changes - Leds " />
 
 Notes:
 * the `_i` in `Led_i` stands for "inverted". Without that the LED is reversed.

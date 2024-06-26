@@ -40,6 +40,8 @@ See the [main README](../)
 
 In Tasmota Web User Interface, go to Configuration > Configure Template.
 
+<img src="/img/gpio_changes_relay.png" width="40%" alt="Tasmota Template Gpio changes - relays " />
+
 Take any free GPIO, and set it from `None` to `Relay` `2`: this will add a toggle button in the main web page, allowing to control "Sun Auto Mode". It can also be toggled with a double click on the physical button.
 
 (optional) Take any other free GPIO, and set it from `None` to `Relay` `3`: this will add another button, allowing to control "Sun Unlimited Mode".
@@ -163,6 +165,9 @@ In Tasmota Web User Interface, go to Configuration > Configure Template.
 Note: on devices like the Athom Monitoring Smart Plug, there is 2 leds:
 * a red led is hard wired to the relay power status. you cannot configure it.
 * a blue led is on a GPIO and configurable: we will use it to show the "Sun Auto Mode" status
+* the led colors blend behind the button: pink means that both leds are ON
+
+<img src="/img/gpio_changes_led.png" width="40%" alt="Tasmota Template Gpio changes - Leds " />
 
 Identify which GPIO is controlling your LED. On Athom Smart Plug it's GPIO13 which is configured as `LedLink` by default. This is your LED. Configure it as `Led_i` `2` so that it will show the status of `Relay` `2` (our "Sun Auto Mode" relay).
 

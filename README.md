@@ -26,7 +26,7 @@ Not tested, but it's certainly possible to use another energy monitoring device,
 
 For french users, the [Denky D4 ESP32 TIC Teleinfo Reader](https://www.tindie.com/products/hallard/denky-d4-esp32-tic-teleinfo-reader/) would be a good choice as well!
 
-## Instructions
+## Instructions to flash Tasmota with scripting enabled
 
 Those Tasmota scripts require that you flash your Tasmota device with scripting enabled.
 
@@ -34,24 +34,39 @@ Unfortunately as of now Tasmota requires you to compile Tasmota with scripting e
 
 If you trust me you can download and use the Tasmota binary I compiled and that I'm using for my own devices.
 
-See bellow if you want to compile Tasmota yourself.
+Note: See bellow if you want to compile Tasmota yourself.
 
 1. get the `tasmota-scripting.bin.gz` and `tasmota-minimal.bin.gz` files from [releases](https://github.com/dooblem/tasmota-stuff/releases).
 
 2. flash the `tasmota-scripting.bin.gz` file using Tasmota web interface. You will probably need to flash the `tasmota-minimal.bin.gz` file first, then flash the scripting version.
 
-3. upload a script using `tasmota-scr.sh`:
-```
-./tasmota-scr.sh push 192.168.1.XX pool-pump/pool-pump.scr
-```
-It will download the current script from your device and show you the differences with the script you want to upload.
-Just press enter to confirm the upload.
+## Instructions to install a script - copy and paste
 
-4. go into your device web console, and check that the script has been uploaded correctly:
+(If you are not familiar with Linux commands)
+
+In Tasmota Web User Interface, go to Tools > Edit Script.
+
+Choose a script named `xxxx.clean.scr` (cleaned of comments).
+
+Copy the content of the script and paste it into the form, then select "Script Enable" and Save it.
+
+Then go into your device web console (Tools > Console), and check that the script has been uploaded correctly:
 ```
 11:51:21.002 SCR: compressed to 1166 bytes = 70 %
 ```
-You may see a compress error if the script is too big. This is not good: the script will not work correctly, or may be truncated at next restart.
+If you see a compress error, this is not good! The script will not work correctly, or may be truncated at next restart! It happens when the script is too big.
+
+## Instructions to install a script - push script
+
+(If you are familiar with Linux command line and want to review each change you push to your device.) 
+
+Upload a script using `tasmota-scr.sh`:
+```
+./tasmota-scr.sh push 192.168.1.XX pool-pump/pool-pump.scr
+```
+
+It will download the current script from your device and show you the differences with the script you want to upload.
+Just press enter to confirm the upload.
 
 ## If you want to compile Tasmota yourself
 

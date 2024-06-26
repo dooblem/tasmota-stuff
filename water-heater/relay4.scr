@@ -14,16 +14,19 @@ prd=0
 cso=0
 i=0
 
+;number of relays on (=> resistor OFF)
 n1=0
+;num of relays off (=> res ON)
 n0=0
-;arrays of 3 elements
+;arrays of 3 elements (which relays are on or off)
 m:r1=0 3
 m:r0=0 3
 
-;resistor locked
-lck=0
-pic=0
-;the real num of res, inc locked
+;resistor locked (0 = none locked)
+;permanent var: in case of reboot when want to keep that
+p:lck=0
+
+;the real num of res, including locked
 n=0
 
 ; timer used to pause execution a few secs to disable flapping
@@ -68,17 +71,19 @@ if (hours==11 and preh==10 and dhot==0)
  =#initRes
  if n0==0 {
   =#pwrRndOff
-  lck=pic
+  lck=i
   =#resEvent(1)
  } else {
-  pic=r0[1+rnd(n0)]
-  lck=pic
+  i=r0[1+rnd(n0)]
+  lck=i
  }
+ svars
 } else {
 if (hours==19 and preh==18)
 {
  print Lock resistor end
  lck=0
+ svars
 }
 }
 preh=hours
@@ -131,7 +136,10 @@ if ((n==1 and cso<750) or (n==2 and cso<1500) or (n==3 and cso<2250))
  dhot=1
  print Cumulus is HOT. unlock. cuOk=1. Sleep 5m
  tmr=300
- lck=0
+ if lck!=0 {
+  lck=0
+  svars
+ }
  ;->WebQuery http://192.168.1.8/?hot=1 GET
  ;set global udp var. x2 for qos
  cuOk=1
@@ -234,12 +242,12 @@ next
 ;;;
 ; pick a random res in array
 #pwrRndOff
-pic=r1[1+rnd(n1)]
-=>Power%0pic% 0
+i=r1[1+rnd(n1)]
+=>Power%0i% 0
 
 #pwrRndOn
-pic=r0[1+rnd(n0)]
-=>Power%0pic% 1
+i=r0[1+rnd(n0)]
+=>Power%0i% 1
 
 #resEvent(n)
 tmr=60

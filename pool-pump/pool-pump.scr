@@ -167,7 +167,7 @@ if (hours>fh and pm+pmy<pmt)
 ; set to /emeter/1 if on 2nd {shelly clamp}
 lky=0
 http=1
-http("__SHELLY_IP__" "/emeter/0")
+http(ip "/emeter/0")
 http=0
 
 ;;;;;;;;;;;;;;;;;;;;;;;; events

@@ -81,7 +81,7 @@ if (hours>fh and pm+pmy<pmt)
 }
 lky=0
 http=1
-http("192.168.1.X" "/emeter/0")
+http(ip "/emeter/0")
 http=0
 >E
 if http==1 {

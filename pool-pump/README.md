@@ -31,8 +31,9 @@ See the [main README](../)
 1. Flash Tasmota with scripting enabled.
 1. Setup Important Tasmota configuration bellow
 1. Get the `pool-pump.clean.scr` script.
-1. Edit the script file, adjust the configuration to your needs (see bellow).
+1. Edit the script file, adjust the configuration to your needs (see "pool-pump.scr important configuration" bellow).
 1. Upload the script to your device.
+2. Test it
 
 ## Important Tasmota configuration
 

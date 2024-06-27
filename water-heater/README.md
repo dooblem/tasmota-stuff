@@ -1,5 +1,7 @@
 # Simple solar diverter - 3 resistor water heating
 
+(Documentation Work In Progress)
+
 If your water heater has 3 resistors, you can modify it to be able to modulate the heating volume from 1 to 3.
 
 <img src="/img/water_heater_3_resistors.jpg" width="50%" alt="Some water heater with 3 resistors" />
